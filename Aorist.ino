@@ -5,9 +5,7 @@
 #define CS  A1
 #define CLK A2
 
-#define MAX7219_AMOUNT 1
-
-LedControl lc(DIN,CLK,CS,MAX7219_AMOUNT);
+LedControl lc(DIN,CLK,CS);
 DS3231     rtc(SDA, SCL);
 
 #define DISPLAY_2DIG(N,POS,DOT) \
@@ -17,7 +15,6 @@ DS3231     rtc(SDA, SCL);
 void setup()
 {
   lc.shutdown(0,false);
-  lc.clearDisplay(0);
   lc.setIntensity(0,1);
   rtc.begin();
   display_temperature();

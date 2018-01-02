@@ -39,6 +39,6 @@ void loop()
 
 inline void display_temperature()
 {
-  int temp = (int)rtc.getTemp();
+  byte temp = (byte)rtc.getTemp();
   DISPLAY_2DIG(temp, 1, false);
 }

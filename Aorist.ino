@@ -59,17 +59,16 @@ ISR(TIMER1_COMPA_vect)
 
 inline void display_temperature()
 {
-  byte temp = (byte)rtc.getTemp();
-  display_2dig(temp, 1, 0);
+  display_2dig(rtc.getTemp(), 1, 0);
 }
 
-void display_2dig(uint8_t value, byte digit, byte dp)
+void display_2dig(uint8_t value, uint8_t digit, uint8_t dp)
 {
   spiTransfer(digit + 1, value / 10);
   spiTransfer(digit,     (value % 10) | dp);
 }
 
-void spiTransfer(volatile byte opcode, volatile byte data)
+void spiTransfer(volatile uint8_t opcode, volatile uint8_t data)
 {
   digitalWrite(SPI_CS, LOW);
   shiftOut(SPI_MOSI, SPI_CLK, MSBFIRST, opcode);

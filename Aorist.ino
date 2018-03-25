@@ -1,21 +1,27 @@
-#include <LedControl.h>
 #include <DS3231.h>
 
-#define DIN A0
-#define CS  A1
-#define CLK A2
+#define SPI_MOSI A0
+#define SPI_CLK  A1
+#define SPI_CS   A2
 
-LedControl lc(DIN,CLK,CS);
-DS3231     rtc(SDA, SCL);
+#define MAX_DECODEMODE   9
+#define MAX_INTENSITY   10
+#define MAX_SCANLIMIT   11
+#define MAX_SHUTDOWN    12
+#define MAX_DISPLAYTEST 15
+#define MAX_DP         128
 
-#define DISPLAY_2DIG(N,POS,DOT) \
-  lc.setDigit(0, POS,   N / 10, false); \
-  lc.setDigit(0, POS-1, N % 10, DOT);
+DS3231 rtc(SDA, SCL);
 
 void setup()
 {
-  lc.shutdown(0,false);
-  lc.setIntensity(0,1);
+  pinMode(SPI_MOSI, OUTPUT);
+  pinMode(SPI_CLK,  OUTPUT);
+  pinMode(SPI_CS,   OUTPUT);
+  spiTransfer(MAX_DECODEMODE, 0xFF);
+  spiTransfer(MAX_INTENSITY,  0);
+  spiTransfer(MAX_SCANLIMIT,  7);
+  spiTransfer(MAX_SHUTDOWN,   1);
   rtc.begin();
   display_temperature();
   // Uncomment the following lines to set date and time
@@ -27,7 +33,7 @@ void setup()
   TCCR1A = TCCR1B = 0;
   TCNT1 = 15623;
   // Set compare match register for 1Hz increments
-  OCR1A = 15624; // (16_000_000) / 1024 - 1
+  OCR1A = 15624; // 16_000_000 / 1024 - 1
   // Turn on CTC mode
   TCCR1B |= (1 << WGM12);
   // Set CS10 and CS12 bits for 1024 prescaler
@@ -42,9 +48,9 @@ void loop(){}
 ISR(TIMER1_COMPA_vect)
 {
   Time t = rtc.getTime();
-  DISPLAY_2DIG(t.hour, 7, true);
-  DISPLAY_2DIG(t.min,  5, true);
-  DISPLAY_2DIG(t.sec,  3, true);
+  display_2dig(t.hour, 7, MAX_DP);
+  display_2dig(t.min,  5, MAX_DP);
+  display_2dig(t.sec,  3, MAX_DP);
   if(t.sec == 0)
   {
     display_temperature();
@@ -54,5 +60,19 @@ ISR(TIMER1_COMPA_vect)
 inline void display_temperature()
 {
   byte temp = (byte)rtc.getTemp();
-  DISPLAY_2DIG(temp, 1, false);
+  display_2dig(temp, 1, 0);
+}
+
+void display_2dig(uint8_t value, byte digit, byte dp)
+{
+  spiTransfer(digit + 1, value / 10);
+  spiTransfer(digit,     (value % 10) | dp);
+}
+
+void spiTransfer(volatile byte opcode, volatile byte data)
+{
+  digitalWrite(SPI_CS, LOW);
+  shiftOut(SPI_MOSI, SPI_CLK, MSBFIRST, opcode);
+  shiftOut(SPI_MOSI, SPI_CLK, MSBFIRST, data);
+  digitalWrite(SPI_CS, HIGH);
 }

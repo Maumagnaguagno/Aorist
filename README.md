@@ -7,5 +7,4 @@
 - RTC DS3231 module
 
 ## Dependencies
-- [LedControl](https://github.com/wayoda/LedControl)
-- DS3231.h
+- [Rinky Dink DS3231](http://www.rinkydinkelectronics.com/library.php?id=73)

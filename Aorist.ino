@@ -13,7 +13,7 @@
 
 DS3231 rtc(SDA, SCL);
 
-void setup()
+void setup(void)
 {
   pinMode(SPI_MOSI, OUTPUT);
   pinMode(SPI_CLK,  OUTPUT);
@@ -43,7 +43,7 @@ void setup()
   interrupts();
 }
 
-void loop(){}
+void loop(void){}
 
 ISR(TIMER1_COMPA_vect)
 {
@@ -57,7 +57,7 @@ ISR(TIMER1_COMPA_vect)
   }
 }
 
-inline void display_temperature()
+inline void display_temperature(void)
 {
   display_2dig(rtc.getTemp(), 1, 0);
 }
@@ -65,10 +65,10 @@ inline void display_temperature()
 void display_2dig(uint8_t value, uint8_t digit, uint8_t dp)
 {
   spiTransfer(digit + 1, value / 10);
-  spiTransfer(digit,     (value % 10) | dp);
+  spiTransfer(digit,    (value % 10) | dp);
 }
 
-void spiTransfer(volatile uint8_t opcode, volatile uint8_t data)
+void spiTransfer(uint8_t opcode, uint8_t data)
 {
   digitalWrite(SPI_CS, LOW);
   shiftOut(SPI_MOSI, SPI_CLK, MSBFIRST, opcode);

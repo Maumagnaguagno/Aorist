@@ -1,4 +1,9 @@
-#include <DS3231.h>
+#include <Wire.h>
+
+#define TWI_FREQ 400000L
+#define DS3231_ADDR 0x68
+#define DS3231_TIME 0x00
+#define DS3231_TEMP 0x11
 
 #define SPI_MOSI A0
 #define SPI_CLK  A1
@@ -11,10 +16,10 @@
 #define MAX_DISPLAYTEST 15
 #define MAX_DP         128
 
-DS3231 rtc(SDA, SCL);
-
 void setup(void)
 {
+  Wire.begin();
+  TWBR = ((F_CPU / TWI_FREQ) - 16) / 2; // Same as Wire.setClock(TWI_FREQ);
   pinMode(SPI_MOSI, OUTPUT);
   pinMode(SPI_CLK,  OUTPUT);
   pinMode(SPI_CS,   OUTPUT);
@@ -22,12 +27,9 @@ void setup(void)
   spiTransfer(MAX_INTENSITY,  0);
   spiTransfer(MAX_SCANLIMIT,  7);
   spiTransfer(MAX_SHUTDOWN,   1);
-  rtc.begin();
   display_temperature();
   // Uncomment the following lines to set date and time
-  //rtc.setDOW(FRIDAY);
-  //rtc.setTime( 3, 48, 0);
-  //rtc.setDate(21,  4, 2017);
+  //rtc_write(0, 48, 3, 5, 21, 4, 17);
   noInterrupts();
   // Set timer1 interrupt at 1Hz
   TCCR1A = TCCR1B = 0;
@@ -47,25 +49,35 @@ void loop(void){}
 
 ISR(TIMER1_COMPA_vect)
 {
-  Time t = rtc.getTime();
-  display_2dig(t.hour, 7, MAX_DP);
-  display_2dig(t.min,  5, MAX_DP);
-  display_2dig(t.sec,  3, MAX_DP);
-  if(t.sec == 0)
+  interrupts();
+  rtc_read(DS3231_TIME, 3);
+  uint8_t sec = Wire.read();
+  uint8_t min = Wire.read();
+  uint8_t hour = Wire.read();
+  display_2dig(hour, 7, MAX_DP);
+  display_2dig(min,  5, MAX_DP);
+  display_2dig(sec,  3, MAX_DP);
+  if(sec == 0)
   {
     display_temperature();
   }
 }
 
-inline void display_temperature(void)
+void display_temperature(void)
 {
-  display_2dig(rtc.getTemp(), 1, 0);
+  rtc_read(DS3231_TEMP, 2);
+  uint8_t temp_msb = Wire.read();
+  uint8_t temp_lsb = Wire.read();
+  // Float formula: (float)temp_msb + ((temp_lsb >> 6) * 0.25f)
+  uint8_t value = temp_msb + (temp_lsb >> 7);
+  spiTransfer(2, value / 10);
+  spiTransfer(1, value % 10);
 }
 
 void display_2dig(uint8_t value, uint8_t digit, uint8_t dp)
 {
-  spiTransfer(digit + 1, value / 10);
-  spiTransfer(digit,    (value % 10) | dp);
+  spiTransfer(digit + 1, value >> 4);
+  spiTransfer(digit,    (value & 0xF) | dp);
 }
 
 void spiTransfer(uint8_t opcode, uint8_t data)
@@ -74,4 +86,26 @@ void spiTransfer(uint8_t opcode, uint8_t data)
   shiftOut(SPI_MOSI, SPI_CLK, MSBFIRST, opcode);
   shiftOut(SPI_MOSI, SPI_CLK, MSBFIRST, data);
   digitalWrite(SPI_CS, HIGH);
+}
+
+void rtc_read(uint8_t address, uint8_t amount)
+{
+  Wire.beginTransmission(DS3231_ADDR);
+  Wire.write(address);
+  Wire.endTransmission();
+  Wire.requestFrom(DS3231_ADDR, amount);
+}
+
+void rtc_write(uint8_t sec, uint8_t min, uint8_t hour, uint8_t dow, uint8_t date, uint8_t mon, uint8_t year)
+{
+  Wire.beginTransmission(DS3231_ADDR);
+  Wire.write(DS3231_TIME);
+  Wire.write(sec);
+  Wire.write(min);
+  Wire.write(hour);
+  Wire.write(dow); // Monday is 1
+  Wire.write(date);
+  Wire.write(mon);
+  Wire.write(year); // Year - 2000
+  Wire.endTransmission();
 }

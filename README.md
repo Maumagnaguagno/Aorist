@@ -5,6 +5,3 @@
 - Arduino compatible board
 - 7-segment 8 digits max7219 module
 - RTC DS3231 module
-
-## Dependencies
-- [Rinky Dink DS3231](http://www.rinkydinkelectronics.com/library.php?id=73)

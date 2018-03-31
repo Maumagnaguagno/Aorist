@@ -68,9 +68,9 @@ void display_temperature(void)
   uint8_t temp_msb = Wire.read();
   uint8_t temp_lsb = Wire.read();
   // Float formula: (float)temp_msb + ((temp_lsb >> 6) * 0.25f)
-  uint8_t value = temp_msb + (temp_lsb >> 7);
-  spiTransfer(2, value / 10);
-  spiTransfer(1, value % 10);
+  temp_msb += temp_lsb >> 7;
+  spiTransfer(2, temp_msb / 10);
+  spiTransfer(1, temp_msb % 10);
 }
 
 void display_2dig(uint8_t value, uint8_t digit, uint8_t dp)

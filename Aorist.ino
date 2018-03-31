@@ -24,10 +24,10 @@ void setup(void)
   pinMode(SPI_MOSI, OUTPUT);
   pinMode(SPI_CLK,  OUTPUT);
   pinMode(SPI_CS,   OUTPUT);
-  spiTransfer(MAX_DECODEMODE, 0xFF);
-  spiTransfer(MAX_INTENSITY,  0);
-  spiTransfer(MAX_SCANLIMIT,  7);
-  spiTransfer(MAX_SHUTDOWN,   1);
+  spi_transfer(MAX_DECODEMODE, 0xFF);
+  spi_transfer(MAX_INTENSITY,  0);
+  spi_transfer(MAX_SCANLIMIT,  7);
+  spi_transfer(MAX_SHUTDOWN,   1);
   display_temperature();
   // Uncomment to set RTC
   //rtc_write(0, 3, (2 << 4) | 3, 5, 3 << 4, 3, (1 << 4) | 8);
@@ -69,17 +69,17 @@ void display_temperature(void)
   uint8_t temp_lsb = Wire.read();
   // Float formula: (float)temp_msb + ((temp_lsb >> 6) * 0.25f)
   temp_msb += temp_lsb >> 7;
-  spiTransfer(2, temp_msb / 10);
-  spiTransfer(1, temp_msb % 10);
+  spi_transfer(2, temp_msb / 10);
+  spi_transfer(1, temp_msb % 10);
 }
 
 void display_2dig(uint8_t value, uint8_t digit, uint8_t dp)
 {
-  spiTransfer(digit + 1, value >> 4);
-  spiTransfer(digit,    (value & 0xF) | dp);
+  spi_transfer(digit + 1, value >> 4);
+  spi_transfer(digit,    (value & 0xF) | dp);
 }
 
-void spiTransfer(uint8_t opcode, uint8_t data)
+void spi_transfer(uint8_t opcode, uint8_t data)
 {
   digitalWrite(SPI_CS, LOW);
   shiftOut(SPI_MOSI, SPI_CLK, MSBFIRST, opcode);

@@ -33,14 +33,12 @@ void setup(void)
   //rtc_write(0, 3, (2 << 4) | 3, 5, 3 << 4, 3, (1 << 4) | 8);
   noInterrupts();
   // Set timer1 interrupt at 1Hz
-  TCCR1A = TCCR1B = 0;
+  TCCR1A = 0;
   TCNT1 = F_CPU / 1024 - 2;
   // Set compare match register for 1Hz increments
   OCR1A = F_CPU / 1024 - 1;
-  // Turn on CTC mode
-  TCCR1B |= 1 << WGM12;
-  // Set CS10 and CS12 bits for 1024 prescaler
-  TCCR1B |= (1 << CS12) | (1 << CS10);
+  // Turn on CTC mode, CS10 and CS12 bits for 1024 prescaler
+  TCCR1B = (1 << WGM12) | (1 << CS12) | (1 << CS10);
   // Enable timer compare interrupt
   TIMSK1 |= 1 << OCIE1A;
   interrupts();

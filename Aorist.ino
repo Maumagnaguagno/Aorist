@@ -51,11 +51,11 @@ ISR(TIMER1_COMPA_vect)
   interrupts();
   rtc_read(DS3231_TIME, 3);
   uint8_t sec = Wire.read();
+  display_2dig(sec,  3, MAX_DP);
   uint8_t min = Wire.read();
+  display_2dig(min,  5, MAX_DP);
   uint8_t hour = Wire.read();
   display_2dig(hour, 7, MAX_DP);
-  display_2dig(min,  5, MAX_DP);
-  display_2dig(sec,  3, MAX_DP);
   if(sec == 0)
   {
     display_temperature();

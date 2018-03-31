@@ -19,7 +19,8 @@
 void setup(void)
 {
   Wire.begin();
-  TWBR = ((F_CPU / TWI_FREQ) - 16) / 2; // Same as Wire.setClock(TWI_FREQ);
+  // Same as Wire.setClock(TWI_FREQ);
+  TWBR = ((F_CPU / TWI_FREQ) - 16) / 2;
   pinMode(SPI_MOSI, OUTPUT);
   pinMode(SPI_CLK,  OUTPUT);
   pinMode(SPI_CS,   OUTPUT);
@@ -28,20 +29,20 @@ void setup(void)
   spiTransfer(MAX_SCANLIMIT,  7);
   spiTransfer(MAX_SHUTDOWN,   1);
   display_temperature();
-  // Uncomment the following lines to set date and time
-  //rtc_write(0, 48, 3, 5, 21, 4, 17);
+  // Uncomment to set RTC
+  //rtc_write(0, 3, (2 << 4) | 3, 5, 3 << 4, 3, (1 << 4) | 8);
   noInterrupts();
   // Set timer1 interrupt at 1Hz
   TCCR1A = TCCR1B = 0;
-  TCNT1 = 15623;
+  TCNT1 = F_CPU / 1024 - 2;
   // Set compare match register for 1Hz increments
-  OCR1A = 15624; // 16_000_000 / 1024 - 1
+  OCR1A = F_CPU / 1024 - 1;
   // Turn on CTC mode
-  TCCR1B |= (1 << WGM12);
+  TCCR1B |= 1 << WGM12;
   // Set CS10 and CS12 bits for 1024 prescaler
   TCCR1B |= (1 << CS12) | (1 << CS10);
   // Enable timer compare interrupt
-  TIMSK1 |= (1 << OCIE1A);
+  TIMSK1 |= 1 << OCIE1A;
   interrupts();
 }
 

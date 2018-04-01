@@ -79,22 +79,22 @@ void display_2dig(uint8_t value, uint8_t digit, uint8_t dp)
   spi_transfer(digit,    (value & 0xF) | dp);
 }
 
-void shiftOutMSB(uint8_t dataPin, uint8_t clockPin, uint8_t val)
+void shiftOutMSB(uint8_t val)
 {
   uint8_t i = 8;
   while(i)
   {
-    digitalWrite(dataPin, (val >> --i) & 1);
-    digitalWrite(clockPin, HIGH);
-    digitalWrite(clockPin, LOW);
+    digitalWrite(SPI_MOSI, (val >> --i) & 1);
+    digitalWrite(SPI_CLK, HIGH);
+    digitalWrite(SPI_CLK, LOW);
   }
 }
 
 void spi_transfer(uint8_t opcode, uint8_t data)
 {
   digitalWrite(SPI_CS, LOW);
-  shiftOutMSB(SPI_MOSI, SPI_CLK, opcode);
-  shiftOutMSB(SPI_MOSI, SPI_CLK, data);
+  shiftOutMSB(opcode);
+  shiftOutMSB(data);
   digitalWrite(SPI_CS, HIGH);
 }
 

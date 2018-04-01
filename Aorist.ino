@@ -93,10 +93,10 @@ void shiftOutMSB(uint8_t val)
 
 void spi_transfer(uint8_t opcode, uint8_t data)
 {
+  digitalWrite(SPI_CS, HIGH);
   digitalWrite(SPI_CS, LOW);
   shiftOutMSB(opcode);
   shiftOutMSB(data);
-  digitalWrite(SPI_CS, HIGH);
 }
 
 void rtc_read(uint8_t address, uint8_t amount)

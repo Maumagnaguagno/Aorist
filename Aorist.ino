@@ -81,12 +81,13 @@ void display_2dig(uint8_t value, uint8_t digit, uint8_t dp)
 
 void shiftOutMSB(uint8_t val)
 {
-  uint8_t i = 8;
+  uint8_t i = 1 << 7;
   while(i)
   {
-    digitalWrite(SPI_MOSI, (val >> --i) & 1);
+    digitalWrite(SPI_MOSI, val & i);
     digitalWrite(SPI_CLK, HIGH);
     digitalWrite(SPI_CLK, LOW);
+    i >>= 1;
   }
 }
 

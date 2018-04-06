@@ -28,7 +28,6 @@ void setup(void)
   spi_transfer(MAX_INTENSITY,  0);
   spi_transfer(MAX_SCANLIMIT,  7);
   spi_transfer(MAX_SHUTDOWN,   1);
-  display_temperature();
   // Uncomment to set RTC
   //rtc_write(0, 3, (2 << 4) | 3, 5, 3 << 4, 3, (1 << 4) | 8);
   noInterrupts();
@@ -41,6 +40,7 @@ void setup(void)
   TCCR1B = (1 << WGM12) | (1 << CS12) | (1 << CS10);
   // Enable timer compare interrupt
   TIMSK1 |= 1 << OCIE1A;
+  display_temperature();
   interrupts();
 }
 
@@ -81,13 +81,11 @@ void display_2dig(uint8_t value, uint8_t digit, uint8_t dp)
 
 void shiftOutMSB(uint8_t val)
 {
-  uint8_t i = 1 << 7;
-  while(i)
+  for(uint8_t i = 1 << 7; i; i >>= 1)
   {
     digitalWrite(SPI_MOSI, val & i);
     digitalWrite(SPI_CLK, HIGH);
     digitalWrite(SPI_CLK, LOW);
-    i >>= 1;
   }
 }
 

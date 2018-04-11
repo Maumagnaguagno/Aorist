@@ -6,8 +6,8 @@
 #define DS3231_TEMP 0x11
 
 #define SPI_MOSI A0
-#define SPI_CLK  A1
-#define SPI_CS   A2
+#define SPI_CS   A1
+#define SPI_CLK  A2
 
 #define MAX_DECODEMODE   9
 #define MAX_INTENSITY   10
@@ -22,8 +22,8 @@ void setup(void)
   // Same as Wire.setClock(TWI_FREQ);
   TWBR = ((F_CPU / TWI_FREQ) - 16) / 2;
   pinMode(SPI_MOSI, OUTPUT);
-  pinMode(SPI_CLK,  OUTPUT);
   pinMode(SPI_CS,   OUTPUT);
+  pinMode(SPI_CLK,  OUTPUT);
   spi_transfer(MAX_DECODEMODE, 0xFF);
   spi_transfer(MAX_INTENSITY,  0);
   spi_transfer(MAX_SCANLIMIT,  7);

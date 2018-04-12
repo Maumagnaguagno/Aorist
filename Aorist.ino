@@ -30,6 +30,7 @@ void setup(void)
   spi_transfer(MAX_SHUTDOWN,   1);
   // Uncomment to set RTC
   //rtc_write(0, 3, (2 << 4) | 3, 5, 3 << 4, 3, (1 << 4) | 8);
+  display_temperature();
   noInterrupts();
   // Set timer1 interrupt at 1Hz
   TCCR1A = 0;
@@ -40,7 +41,6 @@ void setup(void)
   TCCR1B = (1 << WGM12) | (1 << CS12) | (1 << CS10);
   // Enable timer compare interrupt
   TIMSK1 |= 1 << OCIE1A;
-  display_temperature();
   interrupts();
 }
 

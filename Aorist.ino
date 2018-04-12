@@ -51,11 +51,11 @@ ISR(TIMER1_COMPA_vect)
   interrupts();
   rtc_read(DS3231_TIME, 3);
   uint8_t sec = Wire.read();
-  display_2dig(sec,  3, MAX_DP);
+  display_2dig(sec,  3);
   uint8_t min = Wire.read();
-  display_2dig(min,  5, MAX_DP);
+  display_2dig(min,  5);
   uint8_t hour = Wire.read();
-  display_2dig(hour, 7, MAX_DP);
+  display_2dig(hour, 7);
   if(sec == 0)
   {
     display_temperature();
@@ -73,10 +73,10 @@ void display_temperature(void)
   spi_transfer(1, temp_msb % 10);
 }
 
-void display_2dig(uint8_t value, uint8_t digit, uint8_t dp)
+void display_2dig(uint8_t value, uint8_t digit)
 {
   spi_transfer(digit + 1, value >> 4);
-  spi_transfer(digit,    (value & 0xF) | dp);
+  spi_transfer(digit,    (value & 0xF) | MAX_DP);
 }
 
 void shiftOutMSB(uint8_t val)

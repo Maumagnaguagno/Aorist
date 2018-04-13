@@ -20,7 +20,7 @@ void setup(void)
 {
   Wire.begin();
   // Same as Wire.setClock(TWI_FREQ);
-  TWBR = ((F_CPU / TWI_FREQ) - 16) / 2;
+  TWBR = (F_CPU / TWI_FREQ - 16) / 2;
   pinMode(SPI_MOSI, OUTPUT);
   pinMode(SPI_CS,   OUTPUT);
   pinMode(SPI_CLK,  OUTPUT);

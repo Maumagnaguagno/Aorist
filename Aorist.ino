@@ -1,14 +1,28 @@
-#include <Wire.h>
-
 #define TWI_FREQ 400000L
 #define DS3231_ADDR 0x68
 #define DS3231_TIME 0x00
 #define DS3231_TEMP 0x11
 
-#define SPI_PORT DDRC // Comment to use Arduino ports
-#define SPI_MOSI PC0 // A0
-#define SPI_CS   PC1 // A1
-#define SPI_CLK  PC2 // A2
+#define FAST // Comment to use Arduino ports
+#ifdef FAST
+
+  #define I2C_PORT PORTC
+  #define I2C_SDA  PC4
+  #define I2C_SCL  PC5
+  #define SPI_PORT PORTC
+  #define SPI_MODE DDRC
+  #define SPI_MOSI PC0
+  #define SPI_CS   PC1
+  #define SPI_CLK  PC2
+
+#else
+
+  #include <Wire.h>
+  #define SPI_MOSI A0
+  #define SPI_CS   A1
+  #define SPI_CLK  A2
+
+#endif
 
 #define MAX_DECODEMODE   9
 #define MAX_INTENSITY   10
@@ -19,8 +33,7 @@
 
 void setup(void)
 {
-  Wire.begin();
-  Wire.setClock(TWI_FREQ);
+  i2c_begin();
   spi_begin();
   // Uncomment to set RTC
   //rtc_write(0, 3, (2 << 4) | 3, 5, 3 << 4, 3, (1 << 4) | 8);
@@ -41,29 +54,33 @@ void setup(void)
 
 ISR(TIMER1_COMPA_vect)
 {
+#ifndef FAST
   interrupts();
-  rtc_read(DS3231_TIME, 3);
-  uint8_t sec = Wire.read();
+#endif
+  i2c_setup_rtc(DS3231_TIME, 3);
+  uint8_t sec = i2c_read();
   display_2dig(sec,  3);
-  uint8_t min = Wire.read();
+  uint8_t min = i2c_read();
   display_2dig(min,  5);
-  uint8_t hour = Wire.read();
+  uint8_t hour = i2c_read();
   display_2dig(hour, 7);
   if(sec == 0)
   {
     display_temperature();
   }
+  i2c_close();
 }
 
 void display_temperature(void)
 {
-  rtc_read(DS3231_TEMP, 2);
-  uint8_t temp_msb = Wire.read();
-  uint8_t temp_lsb = Wire.read();
+  i2c_setup_rtc(DS3231_TEMP, 2);
+  uint8_t temp_msb = i2c_read();
+  uint8_t temp_lsb = i2c_read();
   // Float formula: (float)temp_msb + ((temp_lsb >> 6) * 0.25f)
   temp_msb += temp_lsb >> 7;
   spi_transfer(2, temp_msb / 10);
   spi_transfer(1, temp_msb % 10);
+  i2c_close();
 }
 
 void display_2dig(uint8_t value, uint8_t digit)
@@ -74,8 +91,8 @@ void display_2dig(uint8_t value, uint8_t digit)
 
 void spi_begin(void)
 {
-#ifdef SPI_PORT
-  SPI_PORT |= (1 << SPI_MOSI) | (1 << SPI_CS) | (1 << SPI_CLK);
+#ifdef FAST
+  SPI_MODE |= (1 << SPI_MOSI) | (1 << SPI_CS) | (1 << SPI_CLK);
 #else
   pinMode(SPI_MOSI, OUTPUT);
   pinMode(SPI_CS,   OUTPUT);
@@ -117,14 +134,76 @@ void spi_transfer(uint8_t opcode, uint8_t data)
   shiftOutMSB(data);
 }
 
-void rtc_read(uint8_t address, uint8_t amount)
+#define TWI_START (1 << TWEN) | (1 << TWINT) | (1 << TWEA) | (1 << TWSTA)
+#define TWI_ACK   (1 << TWEN) | (1 << TWINT) | (1 << TWEA)
+#define i2c_wait() while((TWCR & (1 << TWINT)) == 0)
+
+inline void i2c_begin(void)
 {
+#ifdef FAST
+  // TWI internal pullups for SDA and SCL
+  I2C_PORT |= (1 << I2C_SDA) | (1 << I2C_SCL);
+  // TWI frequency
+  TWBR = (F_CPU / TWI_FREQ - 16) / 2;
+  // TWI prescaler and bit rate
+  TWSR &= ~((1 << TWPS0) | (1 << TWPS1));
+  // Enable TWI module and ack
+  TWCR = (1 << TWEN) | (1 << TWEA);
+#else
+  Wire.begin();
+  Wire.setClock(TWI_FREQ);
+#endif
+}
+
+void i2c_setup_rtc(uint8_t address, uint8_t amount)
+{
+#ifdef FAST
+  TWCR = TWI_START;
+  i2c_wait();
+
+  TWDR = DS3231_ADDR << 1;
+  TWCR = TWI_ACK;
+  i2c_wait();
+
+  TWDR = address;
+  TWCR = TWI_ACK;
+  i2c_wait();
+
+  TWCR = TWI_START;
+  i2c_wait();
+
+  TWDR = (DS3231_ADDR << 1) | 1;
+  TWCR = TWI_ACK;
+  i2c_wait();
+#else
   Wire.beginTransmission(DS3231_ADDR);
   Wire.write(address);
   Wire.endTransmission();
-  Wire.requestFrom(DS3231_ADDR, amount);
+  Wire.requestFrom((uint8_t)DS3231_ADDR, amount);
+#endif
 }
 
+uint8_t i2c_read(void)
+{
+#ifdef FAST
+  TWCR = TWI_ACK;
+  i2c_wait();
+  return TWDR;
+#else
+  return Wire.read();
+#endif
+}
+
+void i2c_close(void)
+{
+#ifdef FAST
+  TWCR = (1 << TWEN) | (1 << TWINT);
+  i2c_wait();
+  TWCR = (1 << TWEN) | (1 << TWINT) | (1 << TWSTO);
+#endif
+}
+
+#ifndef FAST
 void rtc_write(uint8_t sec, uint8_t min, uint8_t hour, uint8_t dow, uint8_t date, uint8_t mon, uint8_t year)
 {
   Wire.beginTransmission(DS3231_ADDR);
@@ -138,3 +217,4 @@ void rtc_write(uint8_t sec, uint8_t min, uint8_t hour, uint8_t dow, uint8_t date
   Wire.write(year); // Year - 2000
   Wire.endTransmission();
 }
+#endif

@@ -5,9 +5,10 @@
 #define DS3231_TIME 0x00
 #define DS3231_TEMP 0x11
 
-#define SPI_MOSI A0
-#define SPI_CS   A1
-#define SPI_CLK  A2
+#define SPI_PORT DDRC // Comment to use Arduino ports
+#define SPI_MOSI PC0 // A0
+#define SPI_CS   PC1 // A1
+#define SPI_CLK  PC2 // A2
 
 #define MAX_DECODEMODE   9
 #define MAX_INTENSITY   10
@@ -20,13 +21,7 @@ void setup(void)
 {
   Wire.begin();
   Wire.setClock(TWI_FREQ);
-  pinMode(SPI_MOSI, OUTPUT);
-  pinMode(SPI_CS,   OUTPUT);
-  pinMode(SPI_CLK,  OUTPUT);
-  spi_transfer(MAX_DECODEMODE, 0xFF);
-  spi_transfer(MAX_INTENSITY,  0);
-  spi_transfer(MAX_SCANLIMIT,  7);
-  spi_transfer(MAX_SHUTDOWN,   1);
+  spi_begin();
   // Uncomment to set RTC
   //rtc_write(0, 3, (2 << 4) | 3, 5, 3 << 4, 3, (1 << 4) | 8);
   display_temperature();
@@ -77,20 +72,47 @@ void display_2dig(uint8_t value, uint8_t digit)
   spi_transfer(digit,    (value & 0xF) | MAX_DP);
 }
 
+void spi_begin(void)
+{
+#ifdef SPI_PORT
+  SPI_PORT |= (1 << SPI_MOSI) | (1 << SPI_CS) | (1 << SPI_CLK);
+#else
+  pinMode(SPI_MOSI, OUTPUT);
+  pinMode(SPI_CS,   OUTPUT);
+  pinMode(SPI_CLK,  OUTPUT);
+#endif
+  spi_transfer(MAX_DECODEMODE, 0xFF);
+  spi_transfer(MAX_INTENSITY,  0);
+  spi_transfer(MAX_SCANLIMIT,  7);
+  spi_transfer(MAX_SHUTDOWN,   1);
+}
+
 void shiftOutMSB(uint8_t val)
 {
   for(uint8_t i = 1 << 7; i; i >>= 1)
   {
+#ifdef SPI_PORT
+    SPI_PORT &= ~(1 << SPI_MOSI);
+    SPI_PORT |= ((val & i) != 0) << SPI_MOSI;
+    SPI_PORT |= 1 << SPI_CLK;
+    SPI_PORT &= ~(1 << SPI_CLK);
+#else
     digitalWrite(SPI_MOSI, val & i);
     digitalWrite(SPI_CLK, HIGH);
     digitalWrite(SPI_CLK, LOW);
+#endif
   }
 }
 
 void spi_transfer(uint8_t opcode, uint8_t data)
 {
+#ifdef SPI_PORT
+  SPI_PORT |= 1 << SPI_CS;
+  SPI_PORT &= ~(1 << SPI_CS);
+#else
   digitalWrite(SPI_CS, HIGH);
   digitalWrite(SPI_CS, LOW);
+#endif
   shiftOutMSB(opcode);
   shiftOutMSB(data);
 }

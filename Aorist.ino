@@ -6,21 +6,21 @@
 #define FAST // Comment to use Arduino ports
 #ifdef FAST
 
-  #define I2C_PORT PORTC
-  #define I2C_SDA  PC4
-  #define I2C_SCL  PC5
-  #define SPI_PORT PORTC
-  #define SPI_MODE DDRC
-  #define SPI_MOSI PC0
-  #define SPI_CS   PC1
-  #define SPI_CLK  PC2
+#define I2C_PORT PORTC
+#define I2C_SDA  PC4
+#define I2C_SCL  PC5
+#define SPI_PORT PORTC
+#define SPI_MODE DDRC
+#define SPI_MOSI PC0
+#define SPI_CS   PC1
+#define SPI_CLK  PC2
 
 #else
 
-  #include <Wire.h>
-  #define SPI_MOSI A0
-  #define SPI_CS   A1
-  #define SPI_CLK  A2
+#include <Wire.h>
+#define SPI_MOSI A0
+#define SPI_CS   A1
+#define SPI_CLK  A2
 
 #endif
 
@@ -31,14 +31,17 @@
 #define MAX_DISPLAYTEST 15
 #define MAX_DP         128
 
-void setup(void)
+int main(void)
 {
+#ifndef FAST
+  init();
+  noInterrupts();
+#endif
   i2c_begin();
   spi_begin();
   // Uncomment to set RTC
-  //rtc_write(0, 3, (2 << 4) | 3, 5, 3 << 4, 3, (1 << 4) | 8);
+  //rtc_write();
   display_temperature();
-  noInterrupts();
   // Set timer1 interrupt at 1Hz
   TCCR1A = 0;
   TCNT1 = F_CPU / 1024 - 2;
@@ -64,11 +67,11 @@ ISR(TIMER1_COMPA_vect)
   display_2dig(min,  5);
   uint8_t hour = i2c_read();
   display_2dig(hour, 7);
+  i2c_close();
   if(sec == 0)
   {
     display_temperature();
   }
-  i2c_close();
 }
 
 void display_temperature(void)
@@ -76,11 +79,11 @@ void display_temperature(void)
   i2c_setup_rtc(DS3231_TEMP, 2);
   uint8_t temp_msb = i2c_read();
   uint8_t temp_lsb = i2c_read();
+  i2c_close();
   // Float formula: (float)temp_msb + ((temp_lsb >> 6) * 0.25f)
   temp_msb += temp_lsb >> 7;
   spi_transfer(2, temp_msb / 10);
   spi_transfer(1, temp_msb % 10);
-  i2c_close();
 }
 
 void display_2dig(uint8_t value, uint8_t digit)
@@ -138,7 +141,7 @@ void spi_transfer(uint8_t opcode, uint8_t data)
 #define TWI_ACK   (1 << TWEN) | (1 << TWINT) | (1 << TWEA)
 #define i2c_wait() while((TWCR & (1 << TWINT)) == 0)
 
-inline void i2c_begin(void)
+void i2c_begin(void)
 {
 #ifdef FAST
   // TWI internal pullups for SDA and SCL
@@ -204,17 +207,18 @@ void i2c_close(void)
 }
 
 #ifndef FAST
-void rtc_write(uint8_t sec, uint8_t min, uint8_t hour, uint8_t dow, uint8_t date, uint8_t mon, uint8_t year)
+#define BCD(n) (n / 10 << 4) | (n % 10)
+void rtc_write()
 {
   Wire.beginTransmission(DS3231_ADDR);
   Wire.write(DS3231_TIME);
-  Wire.write(sec);
-  Wire.write(min);
-  Wire.write(hour);
-  Wire.write(dow); // Monday is 1
-  Wire.write(date);
-  Wire.write(mon);
-  Wire.write(year); // Year - 2000
+  Wire.write(BCD(0));  // Second
+  Wire.write(BCD(27)); // Minute
+  Wire.write(BCD(2));  // Hour
+  Wire.write(5);       // Monday is 1
+  Wire.write(BCD(6));  // Date
+  Wire.write(BCD(12)); // Month
+  Wire.write(BCD(19)); // Year - 2000
   Wire.endTransmission();
 }
 #endif

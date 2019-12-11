@@ -35,13 +35,13 @@ int main(void)
 {
 #ifndef FAST
   init();
-  noInterrupts();
 #endif
   i2c_begin();
   spi_begin();
   // Uncomment to set RTC
   //rtc_write();
   display_temperature();
+  noInterrupts();
   // Set timer1 interrupt at 1Hz
   TCCR1A = 0;
   TCNT1 = F_CPU / 1024 - 2;

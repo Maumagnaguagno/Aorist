@@ -101,10 +101,11 @@ void spi_begin(void)
   pinMode(SPI_CS,   OUTPUT);
   pinMode(SPI_CLK,  OUTPUT);
 #endif
-  spi_transfer(MAX_DECODEMODE, 0xFF);
-  spi_transfer(MAX_INTENSITY,  0);
-  spi_transfer(MAX_SCANLIMIT,  7);
-  spi_transfer(MAX_SHUTDOWN,   1);
+  spi_transfer(MAX_DISPLAYTEST, 0);
+  spi_transfer(MAX_DECODEMODE,  0xFF);
+  spi_transfer(MAX_INTENSITY,   0);
+  spi_transfer(MAX_SCANLIMIT,   7);
+  spi_transfer(MAX_SHUTDOWN,    1);
 }
 
 void shiftOutMSB(uint8_t val)

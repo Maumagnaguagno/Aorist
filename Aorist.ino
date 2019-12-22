@@ -84,8 +84,9 @@ void display_temperature(void)
   i2c_close();
   // Float formula: (float)temp_msb + ((temp_lsb >> 6) * 0.25f)
   temp_msb += temp_lsb >> 7;
-  spi_transfer(2, temp_msb / 10);
-  spi_transfer(1, temp_msb % 10);
+  // Fast division approximation for small integers using 26 / 256
+  spi_transfer(2, (temp_msb * 26) >> 8); // temp_msb / 10
+  spi_transfer(1, temp_msb - ((temp_msb * 26) >> 8) * 10); // temp_msb % 10
 }
 
 void display_2dig(uint8_t value, uint8_t digit)

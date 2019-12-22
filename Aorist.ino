@@ -43,14 +43,16 @@ int main(void)
   display_temperature();
   noInterrupts();
   // Set timer1 interrupt at 1Hz
+#ifndef FAST
   TCCR1A = 0;
+#endif
   TCNT1 = F_CPU / 1024 - 2;
   // Set compare match register for 1Hz increments
   OCR1A = F_CPU / 1024 - 1;
   // Turn on CTC mode, CS10 and CS12 bits for 1024 prescaler
   TCCR1B = (1 << WGM12) | (1 << CS12) | (1 << CS10);
   // Enable timer compare interrupt
-  TIMSK1 |= 1 << OCIE1A;
+  TIMSK1 = 1 << OCIE1A;
   interrupts();
   while(1);
 }

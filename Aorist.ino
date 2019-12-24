@@ -153,7 +153,7 @@ void i2c_begin(void)
   // TWI frequency
   TWBR = (F_CPU / TWI_FREQ - 16) / 2;
   // TWI prescaler and bit rate
-  TWSR &= ~((1 << TWPS0) | (1 << TWPS1));
+  TWSR = ~((1 << TWPS0) | (1 << TWPS1));
   // Enable TWI module and ack
   TWCR = (1 << TWEN) | (1 << TWEA);
 #else

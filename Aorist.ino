@@ -117,7 +117,7 @@ void shiftOutMSB(uint8_t val)
   {
 #ifdef SPI_PORT
     SPI_PORT &= ~(1 << SPI_MOSI);
-    SPI_PORT |= ((val & i) != 0) << SPI_MOSI;
+    if(val & i) SPI_PORT |= 1 << SPI_MOSI;
     SPI_PORT |= 1 << SPI_CLK;
     SPI_PORT &= ~(1 << SPI_CLK);
 #else

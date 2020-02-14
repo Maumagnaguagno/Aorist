@@ -122,11 +122,12 @@ void spi_transfer(uint8_t opcode, uint8_t data)
 #endif
   // Shift out MSB
   uint16_t val = (opcode << 8) | data;
-  for(uint16_t i = 1 << 15; i; i >>= 1)
-  {
+  uint8_t i = 16;
+  do {
 #ifdef SPI_PORT
     SPI_PORT &= ~(1 << SPI_MOSI);
-    if(val & i) SPI_PORT |= 1 << SPI_MOSI;
+    if(val & 0x8000) SPI_PORT |= 1 << SPI_MOSI;
+    val <<= 1;
     SPI_PORT |= 1 << SPI_CLK;
     SPI_PORT &= ~(1 << SPI_CLK);
 #else
@@ -134,7 +135,7 @@ void spi_transfer(uint8_t opcode, uint8_t data)
     digitalWrite(SPI_CLK, HIGH);
     digitalWrite(SPI_CLK, LOW);
 #endif
-  }
+  } while(--i);
 }
 
 #define TWI_START (1 << TWEN) | (1 << TWINT) | (1 << TWEA) | (1 << TWSTA)

@@ -73,7 +73,6 @@ ISR(TIMER1_COMPA_vect)
   display_2dig(min,  5);
   uint8_t hour = i2c_read();
   display_2dig(hour, 7);
-  i2c_close();
   if(sec == 0)
   {
     display_temperature();
@@ -85,7 +84,6 @@ void display_temperature(void)
   i2c_setup_rtc(DS3231_TEMP, 2);
   uint8_t temp_msb = i2c_read();
   uint8_t temp_lsb = i2c_read();
-  i2c_close();
   // Float formula: (float)temp_msb + ((temp_lsb >> 6) * 0.25f)
   temp_msb += temp_lsb >> 7;
   // Fast division approximation for small integers using 26 / 256
@@ -130,9 +128,11 @@ void spi_transfer(uint8_t opcode, uint8_t data)
   } while(--i);
 }
 
-#define TWI_START (1 << TWEN) | (1 << TWINT) | (1 << TWEA) | (1 << TWSTA)
-#define TWI_ACK   (1 << TWEN) | (1 << TWINT) | (1 << TWEA)
-#define i2c_wait() while((TWCR & (1 << TWINT)) == 0)
+#define TWI_START                TWCR = (1 << TWEN) | (1 << TWINT) | (1 << TWSTA); TWI_WAIT
+#define TWI_WRITE(v) TWDR = (v); TWCR = (1 << TWEN) | (1 << TWINT);                TWI_WAIT
+#define TWI_READ                 TWCR = (1 << TWEN) | (1 << TWINT) | (1 << TWEA);  TWI_WAIT
+#define TWI_STOP                 TWCR = (1 << TWEN) | (1 << TWINT) | (1 << TWSTO)
+#define TWI_WAIT while((TWCR & (1 << TWINT)) == 0)
 
 void i2c_begin(void)
 {
@@ -142,9 +142,9 @@ void i2c_begin(void)
   // TWI frequency
   TWBR = (F_CPU / TWI_FREQ - 16) / 2;
   // TWI prescaler and bit rate
-  TWSR = ~((1 << TWPS0) | (1 << TWPS1));
-  // Enable TWI module and ack
-  TWCR = (1 << TWEN) | (1 << TWEA);
+  //TWSR = ~((1 << TWPS0) | (1 << TWPS1));
+  // Enable TWI module
+  TWCR = 1 << TWEN;
 #else
   Wire.begin();
   Wire.setClock(TWI_FREQ);
@@ -154,23 +154,11 @@ void i2c_begin(void)
 void i2c_setup_rtc(uint8_t address, uint8_t amount)
 {
 #ifdef FAST
-  TWCR = TWI_START;
-  i2c_wait();
-
-  TWDR = DS3231_ADDR << 1;
-  TWCR = TWI_ACK;
-  i2c_wait();
-
-  TWDR = address;
-  TWCR = TWI_ACK;
-  i2c_wait();
-
-  TWCR = TWI_START;
-  i2c_wait();
-
-  TWDR = (DS3231_ADDR << 1) | 1;
-  TWCR = TWI_ACK;
-  i2c_wait();
+  TWI_START;
+  TWI_WRITE(DS3231_ADDR << 1);
+  TWI_WRITE(address);
+  TWI_START;
+  TWI_WRITE((DS3231_ADDR << 1) | 1);
 #else
   Wire.beginTransmission(DS3231_ADDR);
   Wire.write(address);
@@ -182,8 +170,7 @@ void i2c_setup_rtc(uint8_t address, uint8_t amount)
 uint8_t i2c_read(void)
 {
 #ifdef FAST
-  TWCR = TWI_ACK;
-  i2c_wait();
+  TWI_READ;
   return TWDR;
 #else
   return Wire.read();
@@ -193,9 +180,7 @@ uint8_t i2c_read(void)
 void i2c_close(void)
 {
 #ifdef FAST
-  TWCR = (1 << TWEN) | (1 << TWINT);
-  i2c_wait();
-  TWCR = (1 << TWEN) | (1 << TWINT) | (1 << TWSTO);
+  TWI_STOP;
 #endif
 }
 

@@ -7,13 +7,15 @@
 #ifdef FAST
 
 #define I2C_PORT PORTC
-#define I2C_SDA  PC4
-#define I2C_SCL  PC5
+#define I2C_SDA  1 << PC4
+#define I2C_SCL  1 << PC5
 #define SPI_PORT PORTC
 #define SPI_MODE DDRC
-#define SPI_MOSI PC0
-#define SPI_CS   PC1
-#define SPI_CLK  PC2
+#define SPI_MOSI 1 << PC0
+#define SPI_CS   1 << PC1
+#define SPI_CLK  1 << PC2
+#define SPI_CS_TOGGLE SPI_PORT |= SPI_CS; SPI_PORT &= ~(SPI_CS)
+#define SPI_DIR       SPI_MODE |= (SPI_MOSI) | (SPI_CS) | (SPI_CLK)
 
 #else
 
@@ -21,6 +23,8 @@
 #define SPI_MOSI A0
 #define SPI_CS   A1
 #define SPI_CLK  A2
+#define SPI_CS_TOGGLE digitalWrite(SPI_CS, HIGH); digitalWrite(SPI_CS, LOW)
+#define SPI_DIR       pinMode(SPI_MOSI, OUTPUT); pinMode(SPI_CS, OUTPUT); pinMode(SPI_CLK, OUTPUT)
 
 #endif
 
@@ -97,13 +101,7 @@ void display_2dig(uint8_t value, uint8_t digit)
 
 void spi_begin(void)
 {
-#ifdef FAST
-  SPI_MODE |= (1 << SPI_MOSI) | (1 << SPI_CS) | (1 << SPI_CLK);
-#else
-  pinMode(SPI_MOSI, OUTPUT);
-  pinMode(SPI_CS,   OUTPUT);
-  pinMode(SPI_CLK,  OUTPUT);
-#endif
+  SPI_DIR;
   spi_transfer(MAX_DISPLAYTEST, 0);
   spi_transfer(MAX_DECODEMODE,  0xFF);
   spi_transfer(MAX_INTENSITY,   0);
@@ -113,28 +111,22 @@ void spi_begin(void)
 
 void spi_transfer(uint8_t opcode, uint8_t data)
 {
-#ifdef SPI_PORT
-  SPI_PORT |= 1 << SPI_CS;
-  SPI_PORT &= ~(1 << SPI_CS);
-#else
-  digitalWrite(SPI_CS, HIGH);
-  digitalWrite(SPI_CS, LOW);
-#endif
+  SPI_CS_TOGGLE;
   // Shift out MSB
   uint16_t val = (opcode << 8) | data;
   uint8_t i = 16;
   do {
-#ifdef SPI_PORT
-    SPI_PORT &= ~(1 << SPI_MOSI);
-    if(val & 0x8000) SPI_PORT |= 1 << SPI_MOSI;
-    val <<= 1;
-    SPI_PORT |= 1 << SPI_CLK;
-    SPI_PORT &= ~(1 << SPI_CLK);
+#ifdef FAST
+    SPI_PORT &= ~(SPI_MOSI);
+    if(val & 0x8000) SPI_PORT |= SPI_MOSI;
+    SPI_PORT |= SPI_CLK;
+    SPI_PORT &= ~(SPI_CLK);
 #else
-    digitalWrite(SPI_MOSI, val & i);
+    digitalWrite(SPI_MOSI, val >> 15);
     digitalWrite(SPI_CLK, HIGH);
     digitalWrite(SPI_CLK, LOW);
 #endif
+    val <<= 1;
   } while(--i);
 }
 
@@ -146,7 +138,7 @@ void i2c_begin(void)
 {
 #ifdef FAST
   // TWI internal pullups for SDA and SCL
-  I2C_PORT |= (1 << I2C_SDA) | (1 << I2C_SCL);
+  I2C_PORT |= (I2C_SDA) | (I2C_SCL);
   // TWI frequency
   TWBR = (F_CPU / TWI_FREQ - 16) / 2;
   // TWI prescaler and bit rate

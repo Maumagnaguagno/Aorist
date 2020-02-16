@@ -143,8 +143,6 @@ void i2c_begin(void)
   TWBR = (F_CPU / TWI_FREQ - 16) / 2;
   // TWI prescaler and bit rate
   //TWSR = ~((1 << TWPS0) | (1 << TWPS1));
-  // Enable TWI module
-  TWCR = 1 << TWEN;
 #else
   Wire.begin();
   Wire.setClock(TWI_FREQ);

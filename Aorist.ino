@@ -85,7 +85,7 @@ void display_temperature(void)
   uint8_t temp_msb = i2c_read();
   uint8_t temp_lsb = i2c_read();
   // Float formula: (float)temp_msb + ((temp_lsb >> 6) * 0.25f)
-  temp_msb += temp_lsb >> 7;
+  if(temp_lsb & 0x80) ++temp_msb;
   // Fast division approximation for small integers using 26 / 256
   spi_transfer(2, (temp_msb * 26) >> 8); // temp_msb / 10
   spi_transfer(1, temp_msb - ((temp_msb * 26) >> 8) * 10); // temp_msb % 10
@@ -120,7 +120,7 @@ void spi_transfer(uint8_t opcode, uint8_t data)
     SPI_PORT |= SPI_CLK;
     SPI_PORT &= ~(SPI_CLK);
 #else
-    digitalWrite(SPI_MOSI, val >> 15);
+    digitalWrite(SPI_MOSI, (val & 0x8000) >> 8);
     digitalWrite(SPI_CLK, HIGH);
     digitalWrite(SPI_CLK, LOW);
 #endif

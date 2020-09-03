@@ -6,16 +6,13 @@
 #define FAST // Comment to use Arduino ports
 #ifdef FAST
 
-#define I2C_PORT PORTC
-#define I2C_SDA  1 << PC4
-#define I2C_SCL  1 << PC5
-#define SPI_PORT PORTC
-#define SPI_MODE DDRC
 #define SPI_MOSI 1 << PC0
 #define SPI_CS   1 << PC1
 #define SPI_CLK  1 << PC2
-#define SPI_CS_TOGGLE SPI_PORT |= SPI_CS; SPI_PORT &= ~(SPI_CS)
-#define SPI_DIR       SPI_MODE |= (SPI_MOSI) | (SPI_CS) | (SPI_CLK)
+#define SPI_MOSI_SET(value) PORTC &= ~(SPI_MOSI); if(value) PORTC |= SPI_MOSI
+#define SPI_CS_TOGGLE  PORTC |= SPI_CS; PORTC &= ~(SPI_CS)
+#define SPI_CLK_TOGGLE PORTC |= SPI_CLK; PORTC &= ~(SPI_CLK)
+#define SPI_DIR        DDRC  |= (SPI_MOSI) | (SPI_CS) | (SPI_CLK)
 
 #else
 
@@ -23,7 +20,9 @@
 #define SPI_MOSI A0
 #define SPI_CS   A1
 #define SPI_CLK  A2
+#define SPI_MOSI_SET(value) digitalWrite(SPI_MOSI, (value) >> 8)
 #define SPI_CS_TOGGLE digitalWrite(SPI_CS, HIGH); digitalWrite(SPI_CS, LOW)
+#define SPI_CLK_TOGGLE digitalWrite(SPI_CLK, HIGH); digitalWrite(SPI_CLK, LOW)
 #define SPI_DIR       pinMode(SPI_MOSI, OUTPUT); pinMode(SPI_CS, OUTPUT); pinMode(SPI_CLK, OUTPUT)
 
 #endif
@@ -114,20 +113,13 @@ void spi_transfer(uint8_t opcode, uint8_t data)
   uint16_t val = (opcode << 8) | data;
   uint8_t i = 16;
   do {
-#ifdef FAST
-    SPI_PORT &= ~(SPI_MOSI);
-    if(val & 0x8000) SPI_PORT |= SPI_MOSI;
-    SPI_PORT |= SPI_CLK;
-    SPI_PORT &= ~(SPI_CLK);
-#else
-    digitalWrite(SPI_MOSI, (val & 0x8000) >> 8);
-    digitalWrite(SPI_CLK, HIGH);
-    digitalWrite(SPI_CLK, LOW);
-#endif
+    SPI_MOSI_SET(val & 0x8000);
+    SPI_CLK_TOGGLE;
     val <<= 1;
   } while(--i);
 }
 
+#define TWI_PULLUP PORTC |= (1 << PC4) | (1 << PC5)
 #define TWI_START                TWCR = (1 << TWEN) | (1 << TWINT) | (1 << TWSTA); TWI_WAIT
 #define TWI_WRITE(v) TWDR = (v); TWCR = (1 << TWEN) | (1 << TWINT);                TWI_WAIT
 #define TWI_READ                 TWCR = (1 << TWEN) | (1 << TWINT) | (1 << TWEA);  TWI_WAIT
@@ -138,7 +130,7 @@ void i2c_begin(void)
 {
 #ifdef FAST
   // TWI internal pullups for SDA and SCL
-  I2C_PORT |= (I2C_SDA) | (I2C_SCL);
+  TWI_PULLUP;
   // TWI frequency
   TWBR = (F_CPU / TWI_FREQ - 16) / 2;
   // TWI prescaler and bit rate

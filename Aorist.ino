@@ -108,7 +108,6 @@ void spi_begin(void)
 
 void spi_transfer(uint8_t opcode, uint8_t data)
 {
-  SPI_CS_TOGGLE;
   // Shift out MSB
   uint16_t val = (opcode << 8) | data;
   uint8_t i = 16;
@@ -117,6 +116,7 @@ void spi_transfer(uint8_t opcode, uint8_t data)
     SPI_CLK_TOGGLE;
     val <<= 1;
   } while(--i);
+  SPI_CS_TOGGLE;
 }
 
 #define TWI_PULLUP PORTC |= (1 << PC4) | (1 << PC5)

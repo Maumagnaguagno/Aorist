@@ -10,7 +10,7 @@
 #define SPI_CS   1 << PC1
 #define SPI_CLK  1 << PC2
 #define SPI_MOSI_SET(value) PORTC &= ~(SPI_MOSI); if(value) PORTC |= SPI_MOSI
-#define SPI_CS_TOGGLE  PORTC |= SPI_CS; PORTC &= ~(SPI_CS)
+#define SPI_CS_TOGGLE  PORTC |= SPI_CS;  PORTC &= ~(SPI_CS)
 #define SPI_CLK_TOGGLE PORTC |= SPI_CLK; PORTC &= ~(SPI_CLK)
 #define SPI_DIR        DDRC  |= (SPI_MOSI) | (SPI_CS) | (SPI_CLK)
 
@@ -21,9 +21,9 @@
 #define SPI_CS   A1
 #define SPI_CLK  A2
 #define SPI_MOSI_SET(value) digitalWrite(SPI_MOSI, (value) >> 8)
-#define SPI_CS_TOGGLE digitalWrite(SPI_CS, HIGH); digitalWrite(SPI_CS, LOW)
+#define SPI_CS_TOGGLE  digitalWrite(SPI_CS, HIGH);  digitalWrite(SPI_CS, LOW)
 #define SPI_CLK_TOGGLE digitalWrite(SPI_CLK, HIGH); digitalWrite(SPI_CLK, LOW)
-#define SPI_DIR       pinMode(SPI_MOSI, OUTPUT); pinMode(SPI_CS, OUTPUT); pinMode(SPI_CLK, OUTPUT)
+#define SPI_DIR        pinMode(SPI_MOSI, OUTPUT); pinMode(SPI_CS, OUTPUT); pinMode(SPI_CLK, OUTPUT)
 
 #endif
 
@@ -153,7 +153,7 @@ void i2c_setup_rtc(uint8_t address, uint8_t amount)
   Wire.beginTransmission(DS3231_ADDR);
   Wire.write(address);
   Wire.endTransmission();
-  Wire.requestFrom((uint8_t)DS3231_ADDR, amount);
+  Wire.requestFrom(DS3231_ADDR, amount);
 #endif
 }
 

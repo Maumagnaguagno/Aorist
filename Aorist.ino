@@ -93,7 +93,7 @@ void display_temperature(void)
 void display_2dig(uint8_t value, uint8_t digit)
 {
   spi_transfer(digit + 1, value >> 4);
-  spi_transfer(digit,    (value & 0xF) | MAX_DP);
+  spi_transfer(digit, value | MAX_DP);
 }
 
 void spi_begin(void)

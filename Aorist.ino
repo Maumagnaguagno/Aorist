@@ -66,12 +66,9 @@ ISR(TIMER1_COMPA_vect)
   interrupts();
 #endif
   i2c_setup_rtc(DS3231_TIME, 3);
-  uint8_t sec = i2c_read();
-  display_2dig(sec,  3);
-  uint8_t min = i2c_read();
-  display_2dig(min,  5);
-  uint8_t hour = i2c_read();
-  display_2dig(hour, 7);
+  uint8_t sec = display_2dig(3);
+  display_2dig(5); // min
+  display_2dig(7); // hour
   if(sec == 0)
   {
     display_temperature();
@@ -90,10 +87,12 @@ void display_temperature(void)
   spi_transfer(1, temp_msb - ((temp_msb * 26) >> 8) * 10); // temp_msb % 10
 }
 
-void display_2dig(uint8_t value, uint8_t digit)
+uint8_t display_2dig(uint8_t digit)
 {
+  uint8_t value = i2c_read();
   spi_transfer(digit + 1, value >> 4);
   spi_transfer(digit, value | MAX_DP);
+  return value;
 }
 
 void spi_begin(void)

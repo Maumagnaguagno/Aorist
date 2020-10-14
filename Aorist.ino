@@ -6,13 +6,13 @@
 #define FAST // Comment to use Arduino ports
 #ifdef FAST
 
-#define SPI_MOSI 1 << PC0
-#define SPI_CS   1 << PC1
-#define SPI_CLK  1 << PC2
-#define SPI_MOSI_SET(value) PORTC &= ~(SPI_MOSI); if(value) PORTC |= SPI_MOSI
-#define SPI_CS_TOGGLE  PORTC |= SPI_CS;  PORTC &= ~(SPI_CS)
-#define SPI_CLK_TOGGLE PORTC |= SPI_CLK; PORTC &= ~(SPI_CLK)
-#define SPI_DIR        DDRC  |= (SPI_MOSI) | (SPI_CS) | (SPI_CLK)
+#define SPI_MOSI (1 << PC0)
+#define SPI_CS   (1 << PC1)
+#define SPI_CLK  (1 << PC2)
+#define SPI_MOSI_SET(value) PORTC &= ~SPI_MOSI; if(value) PORTC |= SPI_MOSI
+#define SPI_CS_TOGGLE  PORTC |= SPI_CS;  PORTC &= ~SPI_CS
+#define SPI_CLK_TOGGLE PORTC |= SPI_CLK; PORTC &= ~SPI_CLK
+#define SPI_DIR        DDRC  |= SPI_MOSI | SPI_CS | SPI_CLK
 
 #else
 

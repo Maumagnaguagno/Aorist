@@ -3,7 +3,8 @@
 #define DS3231_TIME 0x00
 #define DS3231_TEMP 0x11
 
-#define FAST // Comment to use Arduino ports
+#define TEMP 1 // 0: dot, 1: round up, other: truncate
+#define FAST // Comment to use Arduino pins
 #ifdef FAST
 
 #define SPI_MOSI (1 << PC0)
@@ -78,10 +79,13 @@ ISR(TIMER1_COMPA_vect)
 void display_temperature(void)
 {
   i2c_setup_rtc(DS3231_TEMP, 2);
-  uint8_t temp_msb = i2c_read();
-  uint8_t temp_lsb = i2c_read();
   // Float formula: (float)temp_msb + ((temp_lsb >> 6) * 0.25f)
-  if(temp_lsb & 0x80) ++temp_msb;
+  uint8_t temp_msb = i2c_read();
+#if TEMP == 0
+  temp_msb |= i2c_read() & MAX_DP; // Dot
+#elif TEMP == 1
+  if(i2c_read() & 0x80) ++temp_msb; // Round up
+#endif
   // Fast division approximation for small integers using 26 / 256
   spi_transfer(2, (temp_msb * 26) >> 8); // temp_msb / 10
   spi_transfer(1, temp_msb - ((temp_msb * 26) >> 8) * 10); // temp_msb % 10

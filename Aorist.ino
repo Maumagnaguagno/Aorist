@@ -87,8 +87,8 @@ void display_temperature(void)
   if(i2c_read() & 0x80) ++temp_msb; // Round up
 #endif
   // Fast division approximation for small integers using 26 / 256
-  spi_transfer(2, (temp_msb * 26) >> 8); // temp_msb / 10
-  spi_transfer(1, temp_msb - ((temp_msb * 26) >> 8) * 10); // temp_msb % 10
+  spi_transfer(2, temp_msb * 26 >> 8); // temp_msb / 10
+  spi_transfer(1, temp_msb - (temp_msb * 26 >> 8) * 10); // temp_msb % 10
 }
 
 uint8_t display_2dig(uint8_t digit)

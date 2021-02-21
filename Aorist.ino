@@ -45,9 +45,9 @@ int main(void)
   // Uncomment to set RTC
   //rtc_write();
   display_temperature();
-  noInterrupts();
   // Set timer1 interrupt at 1Hz
 #ifndef FAST
+  cli();
   TCCR1A = 0;
 #endif
   TCNT1 = F_CPU / 1024 - 2;
@@ -57,14 +57,14 @@ int main(void)
   TCCR1B = (1 << WGM12) | (1 << CS12) | (1 << CS10);
   // Enable timer compare interrupt
   TIMSK1 = 1 << OCIE1A;
-  interrupts();
+  sei();
   while(1);
 }
 
-ISR(TIMER1_COMPA_vect)
+ISR(TIMER1_COMPA_vect, ISR_NAKED)
 {
 #ifndef FAST
-  interrupts();
+  sei();
 #endif
   i2c_setup_rtc(DS3231_TIME, 3);
   uint8_t sec = display_2dig(3);
@@ -74,6 +74,7 @@ ISR(TIMER1_COMPA_vect)
   {
     display_temperature();
   }
+  reti();
 }
 
 void display_temperature(void)

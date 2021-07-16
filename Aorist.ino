@@ -5,6 +5,8 @@
 
 #define TEMP 1 // 0: dot, 1: round up, other: truncate
 #define FAST // Comment to use Arduino pins
+//#define SPI_HARD // Comment to use soft SPI
+
 #ifdef FAST
 
 #define SPI_MOSI (1 << PC0)
@@ -102,7 +104,12 @@ uint8_t display_2dig(uint8_t digit)
 
 void spi_begin(void)
 {
+#ifdef SPI_HARD
+  DDRB |= (1 << PB2) | (1 << PB3) | (1 << PB5);
+  SPCR = (1 << SPE) | (1 << MSTR) | (1 << SPR1);
+#else
   SPI_DIR;
+#endif
   spi_transfer(MAX_DISPLAYTEST, 0);
   spi_transfer(MAX_DECODEMODE,  0xFF);
   spi_transfer(MAX_INTENSITY,   0);
@@ -112,6 +119,12 @@ void spi_begin(void)
 
 void spi_transfer(uint8_t opcode, uint8_t data)
 {
+#ifdef SPI_HARD
+  SPDR = opcode;
+  while(!(SPSR & (1 << SPIF)));
+  SPDR = data;
+  while(!(SPSR & (1 << SPIF)));
+#else
   // Shift out MSB
   uint16_t val = (opcode << 8) | data;
   uint8_t i = 16;
@@ -120,6 +133,7 @@ void spi_transfer(uint8_t opcode, uint8_t data)
     SPI_CLK_TOGGLE;
     val <<= 1;
   } while(--i);
+#endif
   SPI_CS_TOGGLE;
 }
 

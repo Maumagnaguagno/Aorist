@@ -34,5 +34,4 @@ A5 (PC5) | I2C SCL
 GND      | GND
 
 ## ToDo's
-- Add hardware SPI support
 - Support negative temperatures, see [this](https://arduinodiy.wordpress.com/2015/11/10/the-ds3231-rtc-temperature-sensor/)

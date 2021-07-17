@@ -5,17 +5,31 @@
 
 #define TEMP 1 // 0: dot, 1: round up, other: truncate
 #define FAST // Comment to use Arduino pins
-//#define SPI_HARD // Comment to use soft SPI
+#define SPI_HARD // Comment to use soft SPI, requires FAST 
 
 #ifdef FAST
+#ifdef SPI_HARD
 
+#define SPI_DDR  DDRB
+#define SPI_PORT PORTB
+#define SPI_MOSI (1 << PB3)
+#define SPI_CS   (1 << PB2)
+#define SPI_CLK  (1 << PB5)
+
+#else
+
+#define SPI_DDR  DDRC
+#define SPI_PORT PORTC
 #define SPI_MOSI (1 << PC0)
 #define SPI_CS   (1 << PC1)
 #define SPI_CLK  (1 << PC2)
-#define SPI_MOSI_SET(value) PORTC &= ~SPI_MOSI; if(value) PORTC |= SPI_MOSI
-#define SPI_CS_TOGGLE  PORTC |= SPI_CS;  PORTC &= ~SPI_CS
-#define SPI_CLK_TOGGLE PORTC |= SPI_CLK; PORTC &= ~SPI_CLK
-#define SPI_DIR        DDRC  |= SPI_MOSI | SPI_CS | SPI_CLK
+
+#endif
+
+#define SPI_DIR  SPI_DDR |= SPI_MOSI | SPI_CS | SPI_CLK
+#define SPI_MOSI_SET(value) SPI_PORT &= ~SPI_MOSI; if(value) SPI_PORT |= SPI_MOSI
+#define SPI_CLK_TOGGLE SPI_PORT |= SPI_CLK; SPI_PORT &= ~SPI_CLK
+#define SPI_CS_TOGGLE  SPI_PORT |= SPI_CS;  SPI_PORT &= ~SPI_CS
 
 #else
 
@@ -104,11 +118,9 @@ uint8_t display_2dig(uint8_t digit)
 
 void spi_begin(void)
 {
-#ifdef SPI_HARD
-  DDRB |= (1 << PB2) | (1 << PB3) | (1 << PB5);
-  SPCR = (1 << SPE) | (1 << MSTR) | (1 << SPR1);
-#else
   SPI_DIR;
+#ifdef SPI_HARD
+  SPCR = (1 << SPE) | (1 << MSTR);
 #endif
   spi_transfer(MAX_DISPLAYTEST, 0);
   spi_transfer(MAX_DECODEMODE,  0xFF);

@@ -11,14 +11,14 @@ This limitation is only to conform with the fast division by 10 without hardware
 Note that there are no delays in the code, as the TWI 400KHz for the DS3231 I2C waits a register change and the soft SPI at 16MHz gives enough time to match the minimal requirements of the other modules.
 Software SPI can be used to keep all pins in the same side of an Arduino Nano.
 A **FAST** flag is used to select between bare metal and Arduino code, with the bare metal version using less than 600 bytes of Flash.
-If FAST is enabled, SPI_HARD can be enabled to make use of the SPI hardware, which is faster, but requires specific pins.
+The **SPI_HARD** can be enabled to make use of the faster SPI hardware, but requires specific pins.
 
 ```
 RTC DS3231 <--I2C--> Microcontroller --SPI--> MAX7219
 ```
 
 ## Parts
-- Arduino compatible board
+- Arduino Uno compatible board
 - [7-segment 8 digits MAX7219 module](https://datasheets.maximintegrated.com/en/ds/MAX7219-MAX7221.pdf)
 - [RTC DS3231 module](https://datasheets.maximintegrated.com/en/ds/DS3231.pdf)
 

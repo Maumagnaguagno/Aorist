@@ -5,7 +5,7 @@
 
 #define TEMP 1 // 0: dot, 1: round up, other: truncate
 #define FAST // Comment to use Arduino pins
-#define SPI_HARD // Comment to use soft SPI, requires FAST 
+//#define SPI_HARD // Comment to use soft SPI, requires FAST 
 
 #ifdef FAST
 #ifdef SPI_HARD
@@ -15,6 +15,7 @@
 #define SPI_MOSI (1 << PB3)
 #define SPI_CS   (1 << PB2)
 #define SPI_CLK  (1 << PB5)
+#define SPI_DIR  SPI_DDR |= SPI_MOSI | SPI_CS | SPI_CLK; SPCR = (1 << SPE) | (1 << MSTR)
 
 #else
 
@@ -23,17 +24,25 @@
 #define SPI_MOSI (1 << PC0)
 #define SPI_CS   (1 << PC1)
 #define SPI_CLK  (1 << PC2)
+#define SPI_DIR  SPI_DDR |= SPI_MOSI | SPI_CS | SPI_CLK
 
 #endif
 
-#define SPI_DIR  SPI_DDR |= SPI_MOSI | SPI_CS | SPI_CLK
 #define SPI_MOSI_SET(value) SPI_PORT &= ~SPI_MOSI; if(value) SPI_PORT |= SPI_MOSI
 #define SPI_CLK_TOGGLE SPI_PORT |= SPI_CLK; SPI_PORT &= ~SPI_CLK
 #define SPI_CS_TOGGLE  SPI_PORT |= SPI_CS;  SPI_PORT &= ~SPI_CS
 
+#define TWI_SETUP PORTC |= (1 << PC4) | (1 << PC5); TWBR = (F_CPU / TWI_FREQ - 16) / 2 // Internal pullups for SDA and SCL
+#define TWI_START(v)             TWCR = (1 << TWEN) | (1 << TWINT) | (1 << TWSTA); TWI_WAIT; TWI_WRITE(v << 1)
+#define TWI_WRITE(v) TWDR = (v); TWCR = (1 << TWEN) | (1 << TWINT);                TWI_WAIT
+#define TWI_READ                 TWCR = (1 << TWEN) | (1 << TWINT) | (1 << TWEA);  TWI_WAIT; return TWDR
+#define TWI_STOP                 TWCR = (1 << TWEN) | (1 << TWINT) | (1 << TWSTO)
+#define TWI_WAIT         while((TWCR & (1 << TWINT)) == 0)
+#define TWI_END          ((void)0)
+#define TWI_REQUEST(v,l) TWI_START((v << 1) | 1)
+
 #else
 
-#include <Wire.h>
 #define SPI_MOSI A0
 #define SPI_CS   A1
 #define SPI_CLK  A2
@@ -41,6 +50,15 @@
 #define SPI_CS_TOGGLE  digitalWrite(SPI_CS, HIGH);  digitalWrite(SPI_CS, LOW)
 #define SPI_CLK_TOGGLE digitalWrite(SPI_CLK, HIGH); digitalWrite(SPI_CLK, LOW)
 #define SPI_DIR        pinMode(SPI_MOSI, OUTPUT); pinMode(SPI_CS, OUTPUT); pinMode(SPI_CLK, OUTPUT)
+
+#include <Wire.h>
+#define TWI_SETUP        Wire.begin(); Wire.setClock(TWI_FREQ)
+#define TWI_START(v)     Wire.beginTransmission(v)
+#define TWI_WRITE(v)     Wire.write(v)
+#define TWI_READ         return Wire.read()
+#define TWI_STOP         ((void)0)
+#define TWI_END          Wire.endTransmission()
+#define TWI_REQUEST(v,l) TWI_END; Wire.requestFrom(v, l)
 
 #endif
 
@@ -119,9 +137,6 @@ uint8_t display_2dig(uint8_t digit)
 void spi_begin(void)
 {
   SPI_DIR;
-#ifdef SPI_HARD
-  SPCR = (1 << SPE) | (1 << MSTR);
-#endif
   spi_transfer(MAX_DISPLAYTEST, 0);
   spi_transfer(MAX_DECODEMODE,  0xFF);
   spi_transfer(MAX_INTENSITY,   0);
@@ -149,74 +164,28 @@ void spi_transfer(uint8_t opcode, uint8_t data)
   SPI_CS_TOGGLE;
 }
 
-#define TWI_PULLUP PORTC |= (1 << PC4) | (1 << PC5)
-#define TWI_START                TWCR = (1 << TWEN) | (1 << TWINT) | (1 << TWSTA); TWI_WAIT
-#define TWI_WRITE(v) TWDR = (v); TWCR = (1 << TWEN) | (1 << TWINT);                TWI_WAIT
-#define TWI_READ                 TWCR = (1 << TWEN) | (1 << TWINT) | (1 << TWEA);  TWI_WAIT
-#define TWI_STOP                 TWCR = (1 << TWEN) | (1 << TWINT) | (1 << TWSTO)
-#define TWI_WAIT while((TWCR & (1 << TWINT)) == 0)
-
-void i2c_begin(void)
-{
-#ifdef FAST
-  // TWI internal pullups for SDA and SCL
-  TWI_PULLUP;
-  // TWI frequency
-  TWBR = (F_CPU / TWI_FREQ - 16) / 2;
-  // TWI prescaler and bit rate
-  //TWSR = ~((1 << TWPS0) | (1 << TWPS1));
-#else
-  Wire.begin();
-  Wire.setClock(TWI_FREQ);
-#endif
-}
+void i2c_begin(void)   { TWI_SETUP; }
+void i2c_close(void)   { TWI_STOP;  }
+uint8_t i2c_read(void) { TWI_READ;  }
 
 void i2c_setup_rtc(uint8_t address, uint8_t amount)
 {
-#ifdef FAST
-  TWI_START;
-  TWI_WRITE(DS3231_ADDR << 1);
+  TWI_START(DS3231_ADDR);
   TWI_WRITE(address);
-  TWI_START;
-  TWI_WRITE((DS3231_ADDR << 1) | 1);
-#else
-  Wire.beginTransmission(DS3231_ADDR);
-  Wire.write(address);
-  Wire.endTransmission();
-  Wire.requestFrom(DS3231_ADDR, amount);
-#endif
+  TWI_REQUEST(DS3231_ADDR, amount);
 }
 
-uint8_t i2c_read(void)
-{
-#ifdef FAST
-  TWI_READ;
-  return TWDR;
-#else
-  return Wire.read();
-#endif
-}
-
-void i2c_close(void)
-{
-#ifdef FAST
-  TWI_STOP;
-#endif
-}
-
-#ifndef FAST
 #define BCD(n) (n / 10 << 4) | (n % 10)
 void rtc_write()
 {
-  Wire.beginTransmission(DS3231_ADDR);
-  Wire.write(DS3231_TIME);
-  Wire.write(BCD(0));  // Second
-  Wire.write(BCD(27)); // Minute
-  Wire.write(BCD(2));  // Hour
-  Wire.write(5);       // Monday is 1
-  Wire.write(BCD(6));  // Date
-  Wire.write(BCD(12)); // Month
-  Wire.write(BCD(19)); // Year - 2000
-  Wire.endTransmission();
+  TWI_START(DS3231_ADDR);
+  TWI_WRITE(DS3231_TIME);
+  TWI_WRITE(BCD(0));
+  TWI_WRITE(BCD(27));
+  TWI_WRITE(BCD(2));
+  TWI_WRITE(5);
+  TWI_WRITE(BCD(6));
+  TWI_WRITE(BCD(12));
+  TWI_WRITE(BCD(19));
+  TWI_END;
 }
-#endif

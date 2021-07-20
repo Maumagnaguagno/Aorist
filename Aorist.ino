@@ -5,7 +5,7 @@
 
 #define TEMP 1 // 0: dot, 1: round up, other: truncate
 #define FAST // Comment to use Arduino pins
-//#define SPI_HARD // Comment to use soft SPI, requires FAST 
+//#define SPI_HARD // Comment to use soft SPI, requires FAST
 
 #ifdef FAST
 #ifdef SPI_HARD
@@ -37,7 +37,7 @@
 #define TWI_WRITE(v) TWDR = (v); TWCR = (1 << TWEN) | (1 << TWINT);                TWI_WAIT
 #define TWI_READ                 TWCR = (1 << TWEN) | (1 << TWINT) | (1 << TWEA);  TWI_WAIT; return TWDR
 #define TWI_STOP                 TWCR = (1 << TWEN) | (1 << TWINT) | (1 << TWSTO)
-#define TWI_WAIT         while((TWCR & (1 << TWINT)) == 0)
+#define TWI_WAIT         while(!(TWCR & (1 << TWINT)))
 #define TWI_END          ((void)0)
 #define TWI_REQUEST(v,l) TWI_START((v << 1) | 1)
 
@@ -180,12 +180,12 @@ void rtc_write()
 {
   TWI_START(DS3231_ADDR);
   TWI_WRITE(DS3231_TIME);
-  TWI_WRITE(BCD(0));
-  TWI_WRITE(BCD(27));
-  TWI_WRITE(BCD(2));
-  TWI_WRITE(5);
-  TWI_WRITE(BCD(6));
-  TWI_WRITE(BCD(12));
-  TWI_WRITE(BCD(19));
+  TWI_WRITE(BCD(0));  // Second
+  TWI_WRITE(BCD(27)); // Minute
+  TWI_WRITE(BCD(2));  // Hour
+  TWI_WRITE(5);       // Weekday (Monday is 1)
+  TWI_WRITE(BCD(6));  // Date
+  TWI_WRITE(BCD(12)); // Month
+  TWI_WRITE(BCD(19)); // Year - 2000
   TWI_END;
 }

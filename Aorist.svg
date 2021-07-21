@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="327" height="262" viewBox="0 0 327 262" font-family="Helvetica" font-size="12" text-anchor="middle">
+<style>text{fill:#FFF}</style>
+<rect x="216" y="10" width="110" height="250" rx="2.2" ry="2.2" fill="#00f"/>
+<rect x="6" y="30" width="140" height="120" rx="8.4" ry="8.4" fill="#00f"/>
+<path d="M141 255c0 2.76-2.24 5-5 5H18.5q31.5-25 0-50t0-50H136c2.76 0 5 2.24 5 5z" fill="#060"/>
+<path d="M246 0h50v60h-50z" fill="#555"/>
+<path d="m146 39.9 25 .02q10 .01 10 10.01v165.04q0 10 10 10.01l25 .02" fill="none" stroke="#000" stroke-width="4" stroke-miterlimit="10"/>
+<path d="M141 190h30q10 0 10 10v15" fill="none" stroke="#000" stroke-width="4" stroke-miterlimit="10"/>
+<path d="M146 60h35q10 0 10-10v-5q0-5 10-5h15M141 170h45.03q10 0 10 10v7.48q0 7.49 9.99 7.5l9.98.02" fill="none" stroke="red" stroke-width="4" stroke-miterlimit="10"/>
+<path d="M216 140h-7.5q-7.5 0-7.5-10V90q0-10-10-10h-45" fill="none" stroke="#0f0" stroke-width="4" stroke-miterlimit="10"/>
+<path d="M216 160h-15q-10 0-10-10v-40q0-10-10-10h-35" fill="none" stroke="#ff0" stroke-width="4" stroke-miterlimit="10"/>
+<path d="M141 250h20q10 0 10-10V120q0-10 10-10h35" fill="none" stroke="#f80" stroke-width="4" stroke-miterlimit="10"/>
+<path d="M141 230h10q10 0 10-10V100q0-10 10-10h45" fill="none" stroke="#905" stroke-width="4" stroke-miterlimit="10"/>
+<path d="M141 210h5q5 0 5-10V80q0-10 10-10h55" fill="none" stroke="#60c" stroke-width="4" stroke-miterlimit="10"/>
+<path d="m252.25 83.75 11.68-11.68q7.07-7.07 14.14 0l23.36 23.36q7.07 7.07 0 14.14l-23.36 23.36q-7.07 7.07-14.14 0l-23.36-23.36q-7.07-7.07 0-14.14z" stroke="#000" stroke-miterlimit="10"/>
+<text x="54" y="54" font-size="16">DS3231</text>
+<text x="126" y="44">GND</text>
+<text x="126" y="64">VCC</text>
+<text x="126" y="84">SDA</text>
+<text x="126" y="104">SCL</text>
+<text x="126" y="124">SQW</text>
+<text x="126" y="144">32K</text>
+<text x="59" y="184" font-size="16">MAX7219</text>
+<text x="121" y="174">VCC</text>
+<text x="121" y="194">GND</text>
+<text x="121" y="214">DIN</text>
+<text x="121" y="234">CS</text>
+<text x="121" y="254">CLK</text>
+<text x="271" y="154" font-size="16">NANO</text>
+<text x="231" y="44">3V3</text>
+<text x="231" y="74">A0</text>
+<text x="231" y="94">A1</text>
+<text x="231" y="114">A2</text>
+<text x="231" y="144">A4</text>
+<text x="231" y="164">A5</text>
+<text x="231" y="199">5V</text>
+<text x="231" y="229">GND</text>
+</svg>

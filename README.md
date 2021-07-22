@@ -1,7 +1,7 @@
 # Aorist
 **DS3231 RTC with 7-segment 8 digits display using MAX7219**
 
-The microcontroller is interrupted every second to read the current time from a RTC DS3231 using I2C and to write to a MAX7219 display using SPI.
+The ATmega is interrupted every second to read the time from a RTC DS3231 using I2C and to write to a MAX7219 display using SPI.
 MAX7219 code B decode mode is used to match the DS3231, every RTC byte represents two [BCD](https://en.wikipedia.org/wiki/Binary-coded_decimal) digits.
 
 During setup and then once every minute (second equals to 0) the temperature is updated.
@@ -22,7 +22,7 @@ RTC DS3231 <--I2C--> Microcontroller --SPI--> MAX7219
 ```
 
 ## Parts
-- Arduino Uno compatible board
+- ATmega8/48/88/168/328 compatible board
 - [7-segment 8 digits MAX7219 module](https://datasheets.maximintegrated.com/en/ds/MAX7219-MAX7221.pdf)
 - [RTC DS3231 module](https://datasheets.maximintegrated.com/en/ds/DS3231.pdf)
 

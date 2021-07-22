@@ -39,7 +39,7 @@
 #define TWI_STOP                 TWCR = (1 << TWEN) | (1 << TWINT) | (1 << TWSTO)
 #define TWI_WAIT         while(!(TWCR & (1 << TWINT)))
 #define TWI_END          ((void)0)
-#define TWI_REQUEST(v,l) TWI_START((v << 1) | 1)
+#define TWI_REQUEST(v,l) TWI_START((v << 1) | 1); ((void)l)
 
 #else
 

@@ -13,7 +13,7 @@ This limitation is only to conform with the fast division by 10 without hardware
 Note that there are no delays in the code, as the TWI 400KHz for the DS3231 I2C waits a register change, and the MAX7219 can operate at 10MHz, faster than the hardware SPI.
 A **FAST** flag is used to select between bare metal and Arduino code, with the bare metal version using less than 600 bytes of Flash.
 The **SPI_HARD** can be enabled to make use of the faster SPI hardware, but requires specific pins.
-Software SPI is useful to keep all pins in the same side of an Arduino Nano.
+Software SPI is useful to keep all pins on the same side of an Arduino Nano.
 
 <img align=right src=Aorist.svg>
 

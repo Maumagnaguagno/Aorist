@@ -40,12 +40,12 @@
 
 #define TWI_SETUP PORTC |= (1 << PC4) | (1 << PC5); TWBR = (F_CPU / TWI_FREQ - 16) / 2 // Internal pullups for SDA and SCL
 #define TWI_START(v)             TWCR = (1 << TWEN) | (1 << TWINT) | (1 << TWSTA); TWI_WAIT; TWI_WRITE(v << 1)
+#define TWI_REQUEST(v,l)         TWCR = (1 << TWEN) | (1 << TWINT) | (1 << TWSTA); TWI_WAIT; TWI_WRITE((v << 1) | 1); ((void)l)
 #define TWI_WRITE(v) TWDR = (v); TWCR = (1 << TWEN) | (1 << TWINT);                TWI_WAIT
 #define TWI_READ                 TWCR = (1 << TWEN) | (1 << TWINT) | (1 << TWEA);  TWI_WAIT; return TWDR
 #define TWI_STOP                 TWCR = (1 << TWEN) | (1 << TWINT) | (1 << TWSTO)
 #define TWI_WAIT         while(!(TWCR & (1 << TWINT)))
 #define TWI_END          ((void)0)
-#define TWI_REQUEST(v,l) TWI_START((v << 1) | 1); ((void)l)
 
 #else
 

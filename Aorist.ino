@@ -118,7 +118,7 @@ ISR(TIMER1_COMPA_vect, ISR_NAKED)
 void display_temperature(void)
 {
   i2c_setup_rtc(DS3231_TEMP, 2);
-  // Float formula: (float)temp_msb + ((temp_lsb >> 6) * 0.25f)
+  // Float formula: ((temp_msb << 8) | temp_lsb) / 256.0
   uint8_t temp_msb = i2c_read();
 #if TEMP == 0
   temp_msb |= i2c_read() & MAX_DP; // Dot

@@ -5,7 +5,7 @@ The ATmega is interrupted every second to read the time from a RTC DS3231 using 
 MAX7219 code B decode mode is used to match the DS3231, every RTC byte represents two [BCD](https://en.wikipedia.org/wiki/Binary-coded_decimal) digits.
 
 During setup and then once every minute (second equals to 0) the temperature is updated.
-The temperature is represented by two bytes: ``(float)first_byte + (second_byte >> 6) * 0.25``.
+The temperature is represented by two bytes: ``((temp_msb << 8) | temp_lsb) / 256.0``.
 One can select the temperature to round up, display the real part as a dot, or truncate using the **TEMP** flag.
 The temperature is expected to stay between 0 and 68 degrees celsius, which matches the DS3231S operating range, but not the DS3231SN.
 This limitation is only to conform with the fast division by 10 without hardware division: ``(temperature * 26) >> 8``, which only takes one multiply instruction while discarding the LSB.

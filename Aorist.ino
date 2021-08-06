@@ -16,21 +16,19 @@
 #ifdef FAST
 #ifdef SPI_HARD
 
-#define SPI_DDR  DDRB
 #define SPI_PORT PORTB
 #define SPI_MOSI (1 << PB3)
 #define SPI_CS   (1 << PB2)
 #define SPI_CLK  (1 << PB5)
-#define SPI_DIR  SPI_DDR |= SPI_MOSI | SPI_CS | SPI_CLK; SPCR = (1 << SPE) | (1 << MSTR)
+#define SPI_DIR  DDRB |= SPI_MOSI | SPI_CS | SPI_CLK; SPCR = (1 << SPE) | (1 << MSTR)
 
 #else
 
-#define SPI_DDR  DDRC
 #define SPI_PORT PORTC
 #define SPI_MOSI (1 << PC0)
 #define SPI_CS   (1 << PC1)
 #define SPI_CLK  (1 << PC2)
-#define SPI_DIR  SPI_DDR |= SPI_MOSI | SPI_CS | SPI_CLK
+#define SPI_DIR  DDRC |= SPI_MOSI | SPI_CS | SPI_CLK
 
 #endif
 

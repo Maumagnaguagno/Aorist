@@ -81,7 +81,7 @@ int main(void)
   i2c_begin();
   spi_begin();
   // Uncomment to set RTC
-  //rtc_write();
+  //i2c_write_rtc();
   display_temperature();
   // Set timer1 interrupt at 1Hz
 #ifndef FAST
@@ -180,7 +180,7 @@ void i2c_setup_rtc(uint8_t address, uint8_t amount)
 }
 
 #define BCD(n) (n / 10 << 4) | (n % 10)
-void rtc_write()
+void i2c_write_rtc(void)
 {
   TWI_START(DS3231_ADDR);
   TWI_WRITE(DS3231_TIME);

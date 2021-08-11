@@ -82,7 +82,6 @@ int main(void)
   spi_begin();
   // Uncomment to set RTC
   //i2c_write_rtc();
-  display_temperature();
   // Set timer1 interrupt at 1Hz
 #ifndef FAST
   cli();
@@ -105,12 +104,13 @@ ISR(TIMER1_COMPA_vect, ISR_NAKED)
   sei();
 #endif
   i2c_setup_rtc(DS3231_TIME, 3);
-  uint8_t sec = display_2dig(3);
+  if(!display_2dig(3)) __asm__("clt");
   display_2dig(5); // min
   display_2dig(7); // hour
-  if(sec == 0)
+  if(!(SREG & (1 << SREG_T)))
   {
     display_temperature();
+    __asm__("set");
   }
   reti();
 }

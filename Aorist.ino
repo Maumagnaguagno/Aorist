@@ -107,11 +107,10 @@ ISR(TIMER1_COMPA_vect, ISR_NAKED)
   if(!display_2dig(3)) __asm__("clt");
   display_2dig(5); // min
   display_2dig(7); // hour
-  if(!(SREG & (1 << SREG_T)))
-  {
-    display_temperature();
-    __asm__("set");
-  }
+  __asm__ goto("brts %l0" :::: skip);
+  __asm__("set");
+  display_temperature();
+skip:
   reti();
 }
 

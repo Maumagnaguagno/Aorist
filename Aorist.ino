@@ -50,7 +50,7 @@
 #define SPI_MOSI A0
 #define SPI_CS   A1
 #define SPI_CLK  A2
-#define SPI_MOSI_SET(value) digitalWrite(SPI_MOSI, (value) >> 8)
+#define SPI_MOSI_SET(value) digitalWrite(SPI_MOSI, value)
 #define SPI_CS_TOGGLE  digitalWrite(SPI_CS, HIGH);  digitalWrite(SPI_CS, LOW)
 #define SPI_CLK_TOGGLE digitalWrite(SPI_CLK, HIGH); digitalWrite(SPI_CLK, LOW)
 #define SPI_DIR        pinMode(SPI_MOSI, OUTPUT); pinMode(SPI_CS, OUTPUT); pinMode(SPI_CLK, OUTPUT)
@@ -104,7 +104,7 @@ ISR(TIMER1_COMPA_vect, ISR_NAKED)
   sei();
 #endif
   i2c_setup_rtc(DS3231_TIME, 3);
-  if(!display_2dig(3)) __asm__("clt");
+  if(!display_2dig(3)) __asm__("clt"); // sec
   display_2dig(5); // min
   display_2dig(7); // hour
   __asm__ goto("brts %l0" :::: skip);

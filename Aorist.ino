@@ -10,8 +10,8 @@
 #define DS3231_TEMP 0x11
 
 #define TEMP 1 // 0: dot, 1: round up, other: truncate
-#define FAST // Comment to use Arduino pins
-//#define SPI_HARD // Comment to use soft SPI, requires FAST
+#define FAST // Bare metal pins
+//#define SPI_HARD // Hardware SPI, requires FAST
 
 #ifdef FAST
 #ifdef SPI_HARD

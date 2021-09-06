@@ -104,12 +104,17 @@ ISR(TIMER1_COMPA_vect, ISR_NAKED)
   sei();
 #endif
   i2c_setup_rtc(DS3231_TIME, 3);
-  if(!display_2dig(3)) __asm__("clt"); // sec
-  display_2dig(5); // min
-  display_2dig(7); // hour
-  __asm__ goto("brts %l0" :::: skip);
-  __asm__("set");
+  // Seconds, minutes, hours
+  uint8_t digit = 2;
+  do {
+    uint8_t value = i2c_read();
+    if(!value) __asm__("clt");
+    spi_transfer(++digit, value | MAX_DP);
+    spi_transfer(++digit, value >> 4);
+    __asm__ goto("brts %l0" :::: skip);
+  } while(digit < 8);
   display_temperature();
+  __asm__("set");
 skip:
   reti();
 }
@@ -127,14 +132,6 @@ void display_temperature(void)
   // Fast division approximation for small integers using 26 / 256
   spi_transfer(2, temp_msb * 26 >> 8); // temp_msb / 10
   spi_transfer(1, temp_msb - (temp_msb * 26 >> 8) * 10); // temp_msb % 10
-}
-
-uint8_t display_2dig(uint8_t digit)
-{
-  uint8_t value = i2c_read();
-  spi_transfer(digit + 1, value >> 4);
-  spi_transfer(digit, value | MAX_DP);
-  return value;
 }
 
 void spi_begin(void)

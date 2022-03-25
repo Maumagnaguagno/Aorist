@@ -58,11 +58,11 @@
 #include <Wire.h>
 #define TWI_SETUP        Wire.begin(); Wire.setClock(TWI_FREQ)
 #define TWI_START(v)     Wire.beginTransmission(v)
+#define TWI_REQUEST(v,l) TWI_END; Wire.requestFrom((uint8_t)v, l)
 #define TWI_WRITE(v)     Wire.write(v)
 #define TWI_READ         return Wire.read()
 #define TWI_STOP         ((void)0)
 #define TWI_END          Wire.endTransmission()
-#define TWI_REQUEST(v,l) TWI_END; Wire.requestFrom(v, l)
 
 #endif
 

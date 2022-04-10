@@ -75,22 +75,16 @@
 
 int main(void)
 {
-#ifndef FAST
-  init();
-#endif
   i2c_begin();
   spi_begin();
   // Uncomment to set RTC
   //i2c_write_rtc();
   // Set timer1 interrupt at 1Hz
-#ifndef FAST
-  cli();
-  TCCR1A = 0;
-#endif
   TCNT1 = F_CPU / 1024 - 2;
   // Set compare match register for 1Hz increments
   OCR1A = F_CPU / 1024 - 1;
   // Turn on CTC mode, CS10 and CS12 bits for 1024 prescaler
+  //TCCR1A = 0;
   TCCR1B = (1 << WGM12) | (1 << CS12) | (1 << CS10);
   // Enable timer compare interrupt
   TIMSK1 = 1 << OCIE1A;
@@ -156,7 +150,7 @@ void spi_transfer(uint8_t opcode, uint8_t data)
   uint16_t val = (opcode << 8) | data;
   uint8_t i = 16;
   do {
-    SPI_MOSI_SET(val & 0x8000);
+    SPI_MOSI_SET((val >> 8) & 0x80);
     SPI_CLK_TOGGLE;
     val <<= 1;
   } while(--i);

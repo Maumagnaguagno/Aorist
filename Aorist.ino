@@ -169,17 +169,16 @@ void i2c_setup_rtc(uint8_t address, uint8_t amount)
   TWI_REQUEST(DS3231_ADDR, amount);
 }
 
-#define BCD(n) (n / 10 << 4) | (n % 10)
 void i2c_write_rtc(void)
 {
   TWI_START(DS3231_ADDR);
   TWI_WRITE(DS3231_TIME);
-  TWI_WRITE(BCD(0));  // Second
-  TWI_WRITE(BCD(27)); // Minute
-  TWI_WRITE(BCD(2));  // Hour
-  TWI_WRITE(5);       // Weekday (Monday is 1)
-  TWI_WRITE(BCD(6));  // Date
-  TWI_WRITE(BCD(12)); // Month
-  TWI_WRITE(BCD(19)); // Year - 2000
+  TWI_WRITE(0x38); // Second
+  TWI_WRITE(0x26); // Minute
+  TWI_WRITE(0x23); // Hour
+  TWI_WRITE(6);    // Weekday (Monday is 1)
+  TWI_WRITE(0x13); // Date
+  TWI_WRITE(0x04); // Month
+  TWI_WRITE(0x17); // Year - 2000
   TWI_END;
 }

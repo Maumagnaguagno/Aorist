@@ -176,7 +176,7 @@ void i2c_write_rtc(void)
   TWI_WRITE(0x38); // Second
   TWI_WRITE(0x26); // Minute
   TWI_WRITE(0x23); // Hour
-  TWI_WRITE(6);    // Weekday (Monday is 1)
+  TWI_WRITE(5);    // DoW (1-7)
   TWI_WRITE(0x13); // Date
   TWI_WRITE(0x04); // Month
   TWI_WRITE(0x17); // Year - 2000

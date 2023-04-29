@@ -35,6 +35,7 @@
 #define SPI_MOSI_SET(value) SPI_PORT &= ~SPI_MOSI; if(value) SPI_PORT |= SPI_MOSI
 #define SPI_CLK_TOGGLE SPI_PORT |= SPI_CLK; SPI_PORT &= ~SPI_CLK
 #define SPI_CS_TOGGLE  SPI_PORT |= SPI_CS;  SPI_PORT &= ~SPI_CS
+#define SPI_SHIFTOVER(d1,d2) __asm__("lsl %0" "\n\t" "rol %1" : "+r" (d2), "+r" (d1))
 
 #define TWI_SETUP PORTC |= (1 << PC4) | (1 << PC5); TWBR = (F_CPU / TWI_FREQ - 16) / 2 // Internal pullups for SDA and SCL
 #define TWI_START(v)             TWCR = (1 << TWEN) | (1 << TWINT) | (1 << TWSTA); TWI_WAIT; TWI_WRITE(v << 1)
@@ -54,6 +55,7 @@
 #define SPI_CS_TOGGLE  digitalWrite(SPI_CS, HIGH);  digitalWrite(SPI_CS, LOW)
 #define SPI_CLK_TOGGLE digitalWrite(SPI_CLK, HIGH); digitalWrite(SPI_CLK, LOW)
 #define SPI_SETUP      pinMode(SPI_MOSI, OUTPUT); pinMode(SPI_CS, OUTPUT); pinMode(SPI_CLK, OUTPUT)
+#define SPI_SHIFTOVER(d1,d2) d1 <<= 1; if(d2 & 0x80) d1 |= 1; d2 <<= 1
 
 #include <Wire.h>
 #define TWI_SETUP        Wire.begin(); Wire.setClock(TWI_FREQ)
@@ -100,7 +102,8 @@ ISR(TIMER1_COMPA_vect, ISR_NAKED)
   i2c_setup_rtc(DS3231_TIME, 3);
   // Seconds, minutes, hours
   uint8_t digit = 2;
-  do {
+  do
+  {
     uint8_t value = i2c_read();
     if(!value) __asm__("clt");
     spi_transfer(++digit, value | MAX_DP);
@@ -147,12 +150,12 @@ void spi_transfer(uint8_t opcode, uint8_t data)
   while(!(SPSR & (1 << SPIF)));
 #else
   // Shift out MSB
-  uint16_t val = (opcode << 8) | data;
   uint8_t i = 16;
-  do {
-    SPI_MOSI_SET((val >> 8) & 0x80);
+  do
+  {
+    SPI_MOSI_SET(opcode & 0x80);
     SPI_CLK_TOGGLE;
-    val <<= 1;
+    SPI_SHIFTOVER(opcode, data);
   } while(--i);
 #endif
   SPI_CS_TOGGLE;

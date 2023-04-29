@@ -20,7 +20,7 @@
 #define SPI_MOSI (1 << PB3)
 #define SPI_CS   (1 << PB2)
 #define SPI_CLK  (1 << PB5)
-#define SPI_DIR  DDRB |= SPI_MOSI | SPI_CS | SPI_CLK; SPCR = (1 << SPE) | (1 << MSTR)
+#define SPI_SETUP DDRB |= SPI_MOSI | SPI_CS | SPI_CLK; SPCR = (1 << SPE) | (1 << MSTR)//; SPSR = 1 << SPI2X
 
 #else
 
@@ -28,7 +28,7 @@
 #define SPI_MOSI (1 << PC0)
 #define SPI_CS   (1 << PC1)
 #define SPI_CLK  (1 << PC2)
-#define SPI_DIR  DDRC |= SPI_MOSI | SPI_CS | SPI_CLK
+#define SPI_SETUP DDRC |= SPI_MOSI | SPI_CS | SPI_CLK
 
 #endif
 
@@ -53,7 +53,7 @@
 #define SPI_MOSI_SET(value) digitalWrite(SPI_MOSI, value)
 #define SPI_CS_TOGGLE  digitalWrite(SPI_CS, HIGH);  digitalWrite(SPI_CS, LOW)
 #define SPI_CLK_TOGGLE digitalWrite(SPI_CLK, HIGH); digitalWrite(SPI_CLK, LOW)
-#define SPI_DIR        pinMode(SPI_MOSI, OUTPUT); pinMode(SPI_CS, OUTPUT); pinMode(SPI_CLK, OUTPUT)
+#define SPI_SETUP      pinMode(SPI_MOSI, OUTPUT); pinMode(SPI_CS, OUTPUT); pinMode(SPI_CLK, OUTPUT)
 
 #include <Wire.h>
 #define TWI_SETUP        Wire.begin(); Wire.setClock(TWI_FREQ)
@@ -130,7 +130,7 @@ void display_temperature(void)
 
 void spi_begin(void)
 {
-  SPI_DIR;
+  SPI_SETUP;
   spi_transfer(MAX_DISPLAYTEST, 0);
   spi_transfer(MAX_DECODEMODE,  0xFF);
   spi_transfer(MAX_INTENSITY,   0);

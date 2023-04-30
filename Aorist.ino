@@ -107,7 +107,7 @@ ISR(TIMER1_COMPA_vect, ISR_NAKED)
     uint8_t value = i2c_read();
     if(!value) __asm__("clt");
     spi_transfer(++digit, value | MAX_DP);
-    spi_transfer(++digit, value >> 4);
+    spi_transfer(++digit, value >> 4 & 0xF);
     __asm__ goto("brts %l0" :::: skip);
   } while(digit < 8);
   display_temperature();

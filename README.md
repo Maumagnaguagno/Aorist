@@ -10,12 +10,10 @@ One can select the temperature to round up, display the real part as a dot, or t
 The temperature is expected to stay between 0 and 68 degrees Celsius, which matches the DS3231S operating range, but not the DS3231SN.
 This limitation is only to conform with the fast division by 10 without hardware division: ``(temp_msb * 26) >> 8``, which only takes one multiply instruction while discarding the LSB.
 
-Note that there are no delays in the code, as the TWI 400KHz for the DS3231 I2C waits a register change, and the MAX7219 can operate at 10MHz, faster than the 16MHz ATmega hardware SPI.
+Note that there are no delays in the code, as the TWI 400KHz for the DS3231 I2C waits a register change, and the MAX7219 can operate at 10MHz, faster than any 16MHz ATmega hardware SPI configuration.
 The **FAST** flag selects between bare metal and Arduino code, with the bare metal version using close to 500 bytes of Flash.
-The **SPI_HARD** can be enabled to make use of the faster SPI hardware, but requires specific pins.
+The **SPI_HARD** flag can be enabled to make use of the faster SPI hardware, but requires specific pins.
 Software SPI is useful to keep all pins on the same side of an Arduino Nano.
-
-<img align=right src=Aorist.svg>
 
 ## Parts
 - ATmega8/48/88/168/328 compatible board
@@ -23,6 +21,8 @@ Software SPI is useful to keep all pins on the same side of an Arduino Nano.
 - [RTC DS3231 module](https://datasheets.maximintegrated.com/en/ds/DS3231.pdf)
 
 ## Pins
+<img align=right src=Aorist.svg>
+
 Pin | Module
 --- | ---
 5V       | VCC MAX7219

@@ -1,16 +1,16 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="327" height="262" font-family="Helvetica" font-size="12" text-anchor="middle" fill="#FFF">
 <rect x="216" y="10" width="110" height="250" rx="2" ry="2" fill="#00f"/>
 <rect x="6" y="30" width="140" height="120" rx="8" ry="8" fill="#00f"/>
-<path d="M141 255c0 2.76-2.24 5-5 5H18.5q31.5-25 0-50t0-50H136c2.76 0 5 2.24 5 5z" fill="#060"/>
-<path d="M246 0h50v60h-50z" fill="#555"/>
+<rect x="246" y="75" width="53" height="53" rx="9" ry="9" fill="#000" transform="rotate(45 273 99)"/>
+<path d="M141 255c0 2.76-2.24 5-5 5H18.5q31.5-25 0-50t0-50H136c2.76 0 5 2.24 5 5" fill="#060"/>
+<path d="M246 0h50v60h-50" fill="#555"/>
 <path d="m146 40 25 0q10 0 10 10v165q0 10 10 10l25 0M141 190h30q10 0 10 10" fill="none" stroke="#000" stroke-width="4" stroke-miterlimit="10"/>
 <path d="M146 60h35q10 0 10-10 0-10 10-10h15M141 170h45q10 0 10 10v7.5q0 7.5 10 7.5l10 0" fill="none" stroke="red" stroke-width="4" stroke-miterlimit="10"/>
 <path d="M216 140h-7.5q-7.5 0-7.5-10V90q0-10-10-10h-45" fill="none" stroke="#0f0" stroke-width="4" stroke-miterlimit="10"/>
-<path d="M216 160h-15q-10 0-10-10v-40q0-10-10-10h-35" fill="none" stroke="#ff0" stroke-width="4" stroke-miterlimit="10"/>
+<path d="M216 160h-15q-10 0-10-10v-40q0-10-10-10h-35" fill="none" stroke="#fd0" stroke-width="4" stroke-miterlimit="10"/>
 <path d="M141 250h20q10 0 10-10V120q0-10 10-10h35" fill="none" stroke="#f80" stroke-width="4" stroke-miterlimit="10"/>
 <path d="M141 230h10q10 0 10-10V100q0-10 10-10h45" fill="none" stroke="#905" stroke-width="4" stroke-miterlimit="10"/>
 <path d="M141 210h5q5 0 5-10V80q0-10 10-10h55" fill="none" stroke="#60c" stroke-width="4" stroke-miterlimit="10"/>
-<path d="m252.25 81.75 11.7-11.7q7-7 14 0l23.4 23.4q7 7 0 14l-23.4 23.4q-7 7-14 0l-23.4-23.4q-7-7 0-14z" fill="#000" stroke-miterlimit="10"/>
 <text x="54" y="54" font-size="16">DS3231</text>
 <text x="126" y="44">GND</text>
 <text x="126" y="64">VCC</text>

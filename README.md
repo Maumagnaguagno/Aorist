@@ -23,16 +23,16 @@ Software SPI is useful to keep all pins on the same side of an Arduino Nano.
 ## Pins
 <img align=right src=Aorist.svg>
 
-Pin | Module
+Module | Pin
 --- | ---
-5V       | VCC MAX7219
-A0 (PC0) or D11 (PB3) | SPI MOSI
-A1 (PC1) or D10 (PB2) | SPI CS
-A2 (PC2) or D13 (PB5) | SPI CLK
-3.3V     | VCC DS3231
-A4 (PC4) | I2C SDA
-A5 (PC5) | I2C SCL
-GND      | GND
+VCC DS3231  | 3.3V
+I2C SDA     | A4 (PC4)
+I2C SCL     | A5 (PC5)
+VCC MAX7219 | 5V
+SPI DIN     | A0 (PC0) or D11 (PB3)
+SPI CS      | A1 (PC1) or D10 (PB2)
+SPI CLK     | A2 (PC2) or D13 (PB5)
+GND | GND
 
 ## ToDo's
 - [Support negative temperatures](https://arduinodiy.wordpress.com/2015/11/10/the-ds3231-rtc-temperature-sensor/)

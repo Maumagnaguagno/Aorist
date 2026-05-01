@@ -4,7 +4,7 @@ jobs:
   test:
     strategy:
       matrix:
-        flags: ["", "-DSPI_HARD"]
+        flags: ['', '-DSPI_HARD']
       fail-fast: false
     name: Arduino Nano ${{ matrix.flags }}
     runs-on: ubuntu-latest
@@ -13,6 +13,6 @@ jobs:
     - uses: actions/checkout@v6
     - uses: arduino/compile-sketches@v1
       with:
-        fqbn: "arduino:avr:nano"
-        cli-compile-flags: '["--build-property", "compiler.cpp.extra_flags=${{ matrix.flags }}"]'
+        fqbn: arduino:avr:nano
+        cli-compile-flags: "['--build-property', 'compiler.cpp.extra_flags=${{ matrix.flags }}']"
         sketch-paths: Aorist.ino

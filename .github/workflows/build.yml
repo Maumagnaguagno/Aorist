@@ -14,5 +14,5 @@ jobs:
     - uses: arduino/compile-sketches@v1
       with:
         fqbn: "arduino:avr:nano"
-        build-properties: compiler.cpp.extra_flags=${{ matrix.flags }}
+        cli-compile-flags: '["--build-property", "compiler.cpp.extra_flags=${{ matrix.flags }}"]'
         sketch-paths: Aorist.ino

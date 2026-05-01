@@ -1,0 +1,18 @@
+name: build
+on: [push, pull_request]
+jobs:
+  test:
+    strategy:
+      matrix:
+        flags: ["", "-DSPI_HARD"]
+      fail-fast: false
+    name: Arduino Nano ${{ matrix.flags }}
+    runs-on: ubuntu-latest
+    if: "!contains(github.event.head_commit.message, '[ci skip]')"
+    steps:
+    - uses: actions/checkout@v6
+    - uses: arduino/compile-sketches@v1
+      with:
+        fqbn: "arduino:avr:nano"
+        build-properties: compiler.cpp.extra_flags=${{ matrix.flags }}
+        sketch-paths: Aorist.ino

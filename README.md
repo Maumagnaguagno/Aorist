@@ -1,4 +1,4 @@
-# Aorist
+# Aorist [![Actions Status](https://github.com/Maumagnaguagno/Aorist/workflows/build/badge.svg)](https://github.com/Maumagnaguagno/Aorist/actions)
 **DS3231 RTC with 7-segment 8 digits display using MAX7219**
 
 The ATmega is interrupted every second to read the time from a RTC DS3231 using I2C and to write to a MAX7219 display using SPI.

@@ -11,8 +11,7 @@ jobs:
     if: "!contains(github.event.head_commit.message, '[ci skip]')"
     steps:
     - uses: actions/checkout@v7
-    - uses: arduino/compile-sketches@v1
-      with:
-        fqbn: arduino:avr:nano
-        cli-compile-flags: "['--build-property', 'compiler.cpp.extra_flags=${{ matrix.flags }}']"
-        sketch-paths: .
+    - uses: arduino/setup-arduino-cli@v2
+    - run: arduino-cli core update-index
+    - run: arduino-cli core install arduino:avr
+    - run: arduino-cli compile --fqbn arduino:avr:nano --build-property compiler.cpp.extra_flags="${{ matrix.flags }}" .
